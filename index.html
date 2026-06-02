@@ -2,144 +2,627 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Painel $">
 <title>Painel Financeiro</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0d0d0f;
-    --surface: #16161a;
-    --surface2: #1e1e24;
-    --border: #2a2a35;
-    --accent: #a78bfa;
-    --accent2: #7c3aed;
-    --green: #34d399;
-    --green-dim: #064e3b;
-    --red: #f87171;
-    --red-dim: #450a0a;
-    --yellow: #fbbf24;
-    --text: #f0f0f5;
-    --muted: #6b6b80;
-    --input-bg: #1a1a22;
-  }
+:root {
+  --bg:#0d0d0f; --surface:#16161a; --surface2:#1e1e24; --border:#2a2a35;
+  --accent:#a78bfa; --accent2:#7c3aed; --green:#34d399; --green-dim:#052e16;
+  --red:#f87171; --red-dim:#450a0a; --yellow:#fbbf24; --text:#f0f0f5; --muted:#6b6b80;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;min-height:100vh;padding:20px 16px 80px;font-size:14px;}
+.wrap{max-width:640px;margin:0 auto;}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+/* Header */
+.hdr{margin-bottom:20px;}
+.hdr-tag{font-size:11px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
+.hdr h1{font-size:24px;font-weight:800;letter-spacing:-0.5px;}
+.hdr h1 span{color:var(--accent);}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    min-height: 100vh;
-    padding: 24px 16px 60px;
-  }
+/* Tabs */
+.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:20px;}
+.tab{flex:1;text-align:center;padding:9px;border-radius:8px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;border:none;background:none;transition:all .15s;}
+.tab.on{background:var(--accent2);color:#fff;}
 
-  /* Background texture */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: 
-      radial-gradient(ellipse 80% 50% at 20% 10%, rgba(124,58,237,0.08) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(52,211,153,0.04) 0%, transparent 50%);
-    pointer-events: none;
-    z-index: 0;
-  }
+/* Pages */
+.page{display:none;} .page.on{display:block;}
 
-  .container { max-width: 680px; margin: 0 auto; position: relative; z-index: 1; }
+/* Section */
+.sec{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:12px;overflow:hidden;}
+.sec-hdr{padding:13px 16px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;}
+.sec-hdr:hover{background:#22222c;}
+.sec-title{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.sec-total{font-size:14px;color:var(--text);}
+.sec-icon{color:var(--muted);font-size:11px;transition:transform .2s;}
+.sec.collapsed .sec-icon{transform:rotate(-90deg);}
+.sec-body{padding:14px 16px;}
+.sec-body.hide{display:none;}
 
-  /* Header */
-  .header {
-    margin-bottom: 32px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--border);
-  }
-  .header-tag {
-    font-size: 11px;
-    color: var(--accent);
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-  }
-  .header h1 {
-    font-family: 'Syne', sans-serif;
-    font-size: 28px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    color: var(--text);
-  }
-  .header h1 span { color: var(--accent); }
+/* Rows */
+.row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.row:last-child{margin-bottom:0;}
+.lbl{flex:1;font-size:12px;color:var(--muted);line-height:1.3;}
+.sub{display:block;font-size:10px;color:#44445a;margin-top:1px;}
+.tag{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600;white-space:nowrap;}
+.tag-f{background:rgba(167,139,250,.1);color:var(--accent);border:1px solid rgba(167,139,250,.2);}
+.tag-v{background:rgba(251,191,36,.1);color:var(--yellow);border:1px solid rgba(251,191,36,.2);}
+.ifield{display:flex;align-items:center;background:#1a1a22;border:1px solid var(--border);border-radius:8px;overflow:hidden;width:130px;flex-shrink:0;transition:border-color .15s;}
+.ifield:focus-within{border-color:var(--accent);}
+.ipfx{padding:0 7px;font-size:11px;color:var(--muted);background:var(--surface2);height:34px;display:flex;align-items:center;border-right:1px solid var(--border);}
+.ifield input{background:transparent;border:none;color:var(--accent);font-size:13px;padding:0 8px;width:100%;height:34px;text-align:right;-webkit-appearance:none;}
+.ifield input:focus{outline:none;}
 
-  /* Month selector */
-  .month-bar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 28px;
-  }
-  .month-bar select {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    padding: 8px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    flex: 1;
-  }
-  .month-bar select:focus { outline: none; border-color: var(--accent); }
+/* Calc row */
+.crow{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);margin:10px 0;}
+.crow-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.crow-val{font-size:14px;font-weight:600;color:var(--green);}
 
-  /* Section */
-  .section {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    margin-bottom: 16px;
-    overflow: hidden;
-  }
-  .section-header {
-    padding: 14px 20px;
-    background: var(--surface2);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    cursor: pointer;
-    user-select: none;
-  }
-  .section-header:hover { background: #22222c; }
-  .section-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-  .section-total {
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--text);
-  }
-  .section-body { padding: 16px 20px; }
+/* Divider */
+.div{height:1px;background:var(--border);margin:10px 0;}
+.sub-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
 
-  /* Input rows */
-  .input-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
+/* Lançador */
+.lanc{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px;display:flex;flex-direction:column;gap:8px;}
+.lanc select,.lanc .desc-in{width:100%;background:#1a1a22;border:1px solid var(--border);color:var(--text);font-size:12px;padding:8px 10px;border-radius:8px;-webkit-appearance:none;appearance:none;}
+.lanc select:focus,.lanc .desc-in:focus{outline:none;border-color:var(--accent);}
+.lanc .desc-in::placeholder{color:var(--muted);}
+.lanc-bottom{display:flex;gap:8px;}
+.add-btn{background:var(--accent2);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;padding:0 16px;height:34px;cursor:pointer;white-space:nowrap;flex-shrink:0;-webkit-tap-highlight-color:transparent;}
+.add-btn:active{opacity:.8;}
+
+/* Gasto items */
+.glist{display:flex;flex-direction:column;gap:6px;}
+.gitem{display:flex;align-items:center;justify-content:space-between;background:#1a1a22;border:1px solid var(--border);border-radius:8px;padding:8px 12px;}
+.gitem-l{flex:1;min-width:0;}
+.gitem-cat{font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.gitem-desc{font-size:10px;color:var(--muted);}
+.gitem-r{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.gitem-val{font-size:13px;color:var(--red);font-weight:600;}
+.gitem-rm{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 4px;-webkit-tap-highlight-color:transparent;}
+.gitem-rm:active{color:var(--red);}
+
+/* Summary */
+.sumcard{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 16px;margin-bottom:12px;}
+.sumcard-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.sc{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;}
+.sc-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;}
+.sc-val{font-size:18px;font-weight:600;}
+.sc-val.g{color:var(--green);} .sc-val.r{color:var(--red);} .sc-val.a{color:var(--accent);}
+.sobrabox{border-radius:12px;padding:16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.sobrabox.pos{background:linear-gradient(135deg,var(--green-dim),#052e16);border:1px solid rgba(52,211,153,.2);}
+.sobrabox.neg{background:linear-gradient(135deg,var(--red-dim),#2d0a0a);border:1px solid rgba(248,113,113,.2);}
+.sobra-lbl{font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.sobrabox.pos .sobra-lbl{color:rgba(52,211,153,.6);}
+.sobrabox.neg .sobra-lbl{color:rgba(248,113,113,.6);}
+.sobra-val{font-size:24px;font-weight:800;}
+.sobrabox.pos .sobra-val{color:var(--green);}
+.sobrabox.neg .sobra-val{color:var(--red);}
+.sobra-pct{font-size:18px;font-weight:700;}
+.sobrabox.pos .sobra-pct{color:var(--green);}
+.sobrabox.neg .sobra-pct{color:var(--red);}
+.grow{display:flex;gap:8px;}
+.gc{flex:1;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:10px;padding:11px;text-align:center;}
+.gc-lbl{font-size:10px;color:var(--accent);margin-bottom:4px;}
+.gc-val{font-size:15px;font-weight:600;color:var(--text);}
+
+/* Metas */
+.meta{margin-bottom:14px;}
+.meta-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;}
+.meta-name{font-size:12px;}
+.meta-nums{font-size:11px;color:var(--muted);}
+.pbar{height:6px;background:var(--border);border-radius:99px;overflow:hidden;}
+.pfill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width .4s ease;}
+.meta-falta{font-size:10px;color:var(--muted);margin-top:3px;}
+
+/* Contas */
+.cgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.ccard{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;}
+.ccard-lbl{font-size:10px;color:var(--muted);margin-bottom:8px;line-height:1.3;}
+.ccard .ifield{width:100%;}
+.ctotal{background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.15);border-radius:10px;padding:11px 14px;display:flex;justify-content:space-between;align-items:center;margin-top:10px;}
+.ctotal-lbl{font-size:10px;color:rgba(52,211,153,.6);text-transform:uppercase;letter-spacing:1px;}
+.ctotal-val{font-size:17px;font-weight:600;color:var(--green);}
+
+/* Histórico */
+.hstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.hstat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;}
+.hstat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;}
+.hstat-val{font-size:15px;font-weight:600;}
+
+/* Pizza chart */
+.pizza-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;}
+.pizza-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+.pizza-row{display:flex;align-items:center;gap:12px;}
+.pizza-svg{flex-shrink:0;}
+.pizza-legend{flex:1;display:flex;flex-direction:column;gap:8px;}
+.pizza-item{display:flex;align-items:center;gap:8px;}
+.pizza-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.pizza-item-lbl{font-size:11px;color:var(--muted);flex:1;}
+.pizza-item-val{font-size:13px;font-weight:600;}
+.pizza-item-pct{font-size:11px;color:var(--muted);margin-left:4px;}
+
+/* Tabela hist */
+.htable{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:12px;}
+.hth-row,.htr,.htot{display:grid;grid-template-columns:52px 1fr 1fr 1fr 42px;padding:9px 12px;}
+.hth-row{background:var(--surface2);border-bottom:1px solid var(--border);}
+.hth{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;text-align:right;}
+.hth:first-child{text-align:left;}
+.htr{border-bottom:1px solid var(--border);}
+.htr:last-child{border-bottom:none;}
+.htd{font-size:11px;text-align:right;display:flex;align-items:center;justify-content:flex-end;}
+.htd:first-child{color:var(--muted);justify-content:flex-start;}
+.htd.g{color:var(--green);} .htd.r{color:var(--red);} .htd.a{color:var(--accent);}
+.htd.dim{opacity:.3;}
+.htot{background:var(--surface2);border-top:1px solid var(--border);}
+.htot-td{font-size:11px;font-weight:700;text-align:right;display:flex;align-items:center;justify-content:flex-end;}
+.htot-td:first-child{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);justify-content:flex-start;}
+.hempty{text-align:center;padding:32px;color:var(--muted);font-size:12px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hdr">
+  <div class="hdr-tag">💜 Painel Financeiro</div>
+  <h1>Controle <span>Mensal</span></h1>
+</div>
+
+<div class="tabs">
+  <button class="tab on" onclick="showPage('dash',this)">📊 Dashboard</button>
+  <button class="tab" onclick="showPage('hist',this)">📅 Histórico</button>
+</div>
+
+<!-- ═══════════════ DASHBOARD ═══════════════ -->
+<div id="page-dash" class="page on">
+
+  <!-- Mês -->
+  <div style="margin-bottom:16px;">
+    <select id="mesSelect" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:13px;padding:9px 12px;border-radius:10px;-webkit-appearance:none;appearance:none;">
+      <option value="Jan/2025">Janeiro 2025</option>
+      <option value="Fev/2025">Fevereiro 2025</option>
+      <option value="Mar/2025">Março 2025</option>
+      <option value="Abr/2025">Abril 2025</option>
+      <option value="Mai/2025" selected>Maio 2025</option>
+      <option value="Jun/2025">Junho 2025</option>
+      <option value="Jul/2025">Julho 2025</option>
+      <option value="Ago/2025">Agosto 2025</option>
+      <option value="Set/2025">Setembro 2025</option>
+      <option value="Out/2025">Outubro 2025</option>
+      <option value="Nov/2025">Novembro 2025</option>
+      <option value="Dez/2025">Dezembro 2025</option>
+    </select>
+  </div>
+
+  <!-- RECEITAS -->
+  <div class="sec">
+    <div class="sec-hdr" onclick="tog(this)">
+      <span class="sec-title">📥 Receitas</span>
+      <span class="sec-total" id="lRec">R$ 0,00</span>
+      <span class="sec-icon">▼</span>
+    </div>
+    <div class="sec-body">
+      <div class="row">
+        <div class="lbl">🎬 Aulas editadas (qtd)<span class="sub">× R$ 200 = total produtora</span></div>
+        <div class="ifield"><input type="number" id="aulasQtd" value="20" min="0" inputmode="numeric" oninput="calc()"></div>
+        <span class="tag tag-v">VAR</span>
+      </div>
+      <div class="crow"><span class="crow-lbl">Total produtora</span><span class="crow-val" id="lProd">R$ 4.000,00</span></div>
+      <div class="row">
+        <div class="lbl">🎙️ Podcast</div>
+        <div class="ifield"><span class="ipfx">R$</span><input type="number" id="podcast" value="350" min="0" inputmode="decimal" oninput="calc()"></div>
+        <span class="tag tag-v">VAR</span>
+      </div>
+      <div class="row">
+        <div class="lbl">👨‍👩‍👦 Fixo (pai)</div>
+        <div class="ifield"><span class="ipfx">R$</span><input type="number" id="pai" value="650" min="0" inputmode="decimal" oninput="calc()"></div>
+        <span class="tag tag-f">FIXO</span>
+      </div>
+      <div class="row">
+        <div class="lbl">➕ Outras receitas</div>
+        <div class="ifield"><span class="ipfx">R$</span><input type="number" id="outrasRec" value="0" min="0" inputmode="decimal" oninput="calc()"></div>
+        <span class="tag tag-v">VAR</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- GASTOS FIXOS -->
+  <div class="sec">
+    <div class="sec-hdr" onclick="tog(this)">
+      <span class="sec-title">📌 Gastos Fixos</span>
+      <span class="sec-total" id="lFix">R$ 0,00</span>
+      <span class="sec-icon">▼</span>
+    </div>
+    <div class="sec-body">
+      <div class="row"><div class="lbl">💳 Cartão fixo</div><div class="ifield"><span class="ipfx">R$</span><input type="number" id="cartao" value="340" min="0" inputmode="decimal" oninput="calc()"></div><span class="tag tag-f">FIXO</span></div>
+      <div class="row"><div class="lbl">📱 Telefone + Internet<span class="sub">Você + mãe</span></div><div class="ifield"><span class="ipfx">R$</span><input type="number" id="internet" value="440" min="0" inputmode="decimal" oninput="calc()"></div><span class="tag tag-f">FIXO</span></div>
+      <div class="div"></div>
+      <div class="sub-lbl">Assinaturas</div>
+      <div class="row"><div class="lbl">🎨 Adobe Creative</div><div class="ifield"><span class="ipfx">R$</span><input type="number" id="adobe" value="83.14" min="0" inputmode="decimal" oninput="calc()"></div><span class="tag tag-f">FIXO</span></div>
+      <div class="row"><div class="lbl">🏋️ Smart Fit</div><div class="ifield"><span class="ipfx">R$</span><input type="number" id="smartfit" value="140" min="0" inputmode="decimal" oninput="calc()"></div><span class="tag tag-f">FIXO</span></div>
+      <div class="row"><div class="lbl">📺 HBO Max</div><div class="ifield"><span class="ipfx">R$</span><input type="number" id="hbo" value="44.90" min="0" inputmode="decimal" oninput="calc()"></div><span class="tag tag-f">FIXO</span></div>
+      <div class="row"><div class="lbl">▶️ YouTube Premium</div><div class="ifield"><span class="ipfx">R$</span><input type="number" id="yt" value="34.90" min="0" inputmode="decimal" oninput="calc()"></div><span class="tag tag-f">FIXO</span></div>
+      <div class="row"><div class="lbl">☁️ iCloud</div><div class="ifield"><span class="ipfx">R$</span><input type="number" id="icloud" value="19.90" min="0" inputmode="decimal" oninput="calc()"></div><span class="tag tag-f">FIXO</span></div>
+      <div class="row"><div class="lbl">☁️ Google One</div><div class="ifield"><span class="ipfx">R$</span><input type="number" id="gone" value="4.50" min="0" inputmode="decimal" oninput="calc()"></div><span class="tag tag-f">FIXO</span></div>
+      <div class="row"><div class="lbl">☁️ Google Drive</div><div class="ifield"><span class="ipfx">R$</span><input type="number" id="gdrive" value="11.99" min="0" inputmode="decimal" oninput="calc()"></div><span class="tag tag-f">FIXO</span></div>
+    </div>
+  </div>
+
+  <!-- GASTOS VARIÁVEIS -->
+  <div class="sec">
+    <div class="sec-hdr" onclick="tog(this)">
+      <span class="sec-title">🛒 Gastos Variáveis</span>
+      <span class="sec-total" id="lVar">R$ 0,00</span>
+      <span class="sec-icon">▼</span>
+    </div>
+    <div class="sec-body">
+      <div class="lanc">
+        <select id="lancCat">
+          <option>🛒 Mercado / Alimentação</option>
+          <option>🚗 Transporte (Uber etc)</option>
+          <option>👕 Roupas / Compras</option>
+          <option>🔧 Trabalho / Ferramentas</option>
+          <option>🍔 Delivery / Restaurante</option>
+          <option>💊 Saúde / Farmácia</option>
+          <option>🎮 Lazer / Entretenimento</option>
+          <option>➕ Outro</option>
+        </select>
+        <input type="text" class="desc-in" id="lancDesc" placeholder="Descrição (opcional)" maxlength="40">
+        <div class="lanc-bottom">
+          <div class="ifield" style="flex:1"><span class="ipfx">R$</span><input type="number" id="lancVal" placeholder="0,00" min="0" inputmode="decimal" onkeydown="if(event.key==='Enter')addGasto()"></div>
+          <button class="add-btn" onclick="addGasto()">+ Adicionar</button>
+        </div>
+      </div>
+      <div class="glist" id="glist"></div>
+      <div class="crow" style="margin-top:10px;"><span class="crow-lbl">Total variáveis</span><span class="crow-val" id="lVarTotal">R$ 0,00</span></div>
+    </div>
+  </div>
+
+  <!-- SALDO DAS CONTAS -->
+  <div class="sec">
+    <div class="sec-hdr" onclick="tog(this)">
+      <span class="sec-title">🏦 Saldo das Contas</span>
+      <span class="sec-total" id="lContas">R$ 0,00</span>
+      <span class="sec-icon">▼</span>
+    </div>
+    <div class="sec-body">
+      <div class="cgrid">
+        <div class="ccard"><div class="ccard-lbl">🏧 Conta PF</div><div class="ifield"><span class="ipfx">R$</span><input type="number" id="saldoPF" value="1350" min="0" inputmode="decimal" oninput="calc()"></div></div>
+        <div class="ccard"><div class="ccard-lbl">💜 Caixinha PJ</div><div class="ifield"><span class="ipfx">R$</span><input type="number" id="saldoCaixinha" value="1500" min="0" inputmode="decimal" oninput="calc()"></div></div>
+        <div class="ccard"><div class="ccard-lbl">💼 Conta PJ</div><div class="ifield"><span class="ipfx">R$</span><input type="number" id="saldoPJ" value="0" min="0" inputmode="decimal" oninput="calc()"></div></div>
+      </div>
+      <div class="ctotal"><span class="ctotal-lbl">💎 Patrimônio Total</span><span class="ctotal-val" id="lPatr">R$ 0,00</span></div>
+    </div>
+  </div>
+
+  <!-- RESUMO -->
+  <div class="sumcard">
+    <div class="sumcard-title">📊 Resumo do Mês</div>
+    <div class="sg">
+      <div class="sc"><div class="sc-lbl">Total Receitas</div><div class="sc-val g" id="sRec">R$ 0,00</div></div>
+      <div class="sc"><div class="sc-lbl">Total Gastos</div><div class="sc-val r" id="sGasto">R$ 0,00</div></div>
+    </div>
+    <div class="sobrabox pos" id="sobrabox">
+      <div><div class="sobra-lbl" id="sobraLbl">Sobra do mês</div><div class="sobra-val" id="sobraVal">R$ 0,00</div></div>
+      <div style="text-align:right"><div style="font-size:10px;color:rgba(52,211,153,.5);margin-bottom:3px;">% da renda</div><div class="sobra-pct" id="sobraPct">0%</div></div>
+    </div>
+    <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Sugestão de guardar</div>
+    <div class="grow">
+      <div class="gc"><div class="gc-lbl">30% da renda</div><div class="gc-val" id="g30">R$ 0,00</div></div>
+      <div class="gc"><div class="gc-lbl">40% da renda</div><div class="gc-val" id="g40">R$ 0,00</div></div>
+    </div>
+  </div>
+
+  <!-- METAS -->
+  <div class="sec">
+    <div class="sec-hdr" onclick="tog(this)">
+      <span class="sec-title">🎯 Metas</span>
+      <span class="sec-total" id="lMeta"></span>
+      <span class="sec-icon">▼</span>
+    </div>
+    <div class="sec-body">
+      <div class="meta">
+        <div class="meta-top"><span class="meta-name">🥇 Meta 1 — R$ 5.000</span><span class="meta-nums" id="m1n">—</span></div>
+        <div class="pbar"><div class="pfill" id="m1b" style="width:0%"></div></div>
+        <div class="meta-falta" id="m1f"></div>
+      </div>
+      <div class="meta">
+        <div class="meta-top"><span class="meta-name">🥈 Meta 2 — R$ 10.000</span><span class="meta-nums" id="m2n">—</span></div>
+        <div class="pbar"><div class="pfill" id="m2b" style="width:0%"></div></div>
+        <div class="meta-falta" id="m2f"></div>
+      </div>
+      <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px;">
+        <div class="sub-lbl">Total na caixinha hoje</div>
+        <div class="row" style="margin-bottom:0">
+          <div class="lbl">💰 Guardado</div>
+          <div class="ifield"><span class="ipfx">R$</span><input type="number" id="guardado" value="1500" min="0" inputmode="decimal" oninput="calc()"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end dash -->
+
+<!-- ═══════════════ HISTÓRICO ═══════════════ -->
+<div id="page-hist" class="page">
+
+  <div class="hstats">
+    <div class="hstat"><div class="hstat-lbl">Recebido</div><div class="hstat-val" style="color:var(--green)" id="hRec">R$ 0</div></div>
+    <div class="hstat"><div class="hstat-lbl">Gasto</div><div class="hstat-val" style="color:var(--red)" id="hGasto">R$ 0</div></div>
+    <div class="hstat"><div class="hstat-lbl">Guardado</div><div class="hstat-val" style="color:var(--yellow)" id="hGuardado">R$ 0</div></div>
+  </div>
+
+  <div class="pizza-wrap">
+    <div class="pizza-title">🍩 Distribuição anual</div>
+    <div class="pizza-row">
+      <svg class="pizza-svg" id="pizzaSvg" width="110" height="110" viewBox="0 0 110 110"></svg>
+      <div class="pizza-legend" id="pizzaLegend"></div>
+    </div>
+  </div>
+
+  <div class="htable">
+    <div class="hth-row">
+      <div class="hth">Mês</div>
+      <div class="hth">Receitas</div>
+      <div class="hth">Gastos</div>
+      <div class="hth">Sobra</div>
+      <div class="hth">Aulas</div>
+    </div>
+    <div id="htbody"></div>
+    <div class="htot" id="htot" style="display:none">
+      <div class="htot-td">Total</div>
+      <div class="htot-td g" id="htRec">—</div>
+      <div class="htot-td r" id="htGasto">—</div>
+      <div class="htot-td a" id="htSobra">—</div>
+      <div class="htot-td" id="htAulas">—</div>
+    </div>
+  </div>
+
+</div><!-- end hist -->
+
+</div><!-- wrap -->
+
+<script>
+// ─── Storage via IndexedDB ───────────────────────────────────────────────────
+var IDB = (function(){
+  var db = null;
+  var DB = 'pf2', VER = 1, ST = 'meses';
+  function open(){
+    return new Promise(function(ok,err){
+      if(db) return ok(db);
+      var r = indexedDB.open(DB, VER);
+      r.onupgradeneeded = function(e){ e.target.result.createObjectStore(ST,{keyPath:'mes'}); };
+      r.onsuccess = function(e){ db = e.target.result; ok(db); };
+      r.onerror = function(){ err(r.error); };
+    });
   }
-  .input-row:last-child { margin-bottom: 0; }
-  .input-label {
-    flex: 1;
-    font-size: 12px;
-    color: var(--muted);
-    line-height: 1.3;
+  return {
+    set: function(k,v){
+      return open().then(function(d){
+        return new Promise(function(ok,err){
+          var tx = d.transaction(ST,'readwrite');
+          tx.objectStore(ST).put(Object.assign({mes:k},v));
+          tx.oncomplete = ok; tx.onerror = function(){err(tx.error);};
+        });
+      });
+    },
+    get: function(k){
+      return open().then(function(d){
+        return new Promise(function(ok,err){
+          var r = d.transaction(ST).objectStore(ST).get(k);
+          r.onsuccess = function(){ ok(r.result||null); };
+          r.onerror = function(){ err(r.error); };
+        });
+      });
+    }
+  };
+})();
+
+// ─── State ───────────────────────────────────────────────────────────────────
+var gastosVar = [];
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+var brl = function(v){ return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); };
+var brlk = function(v){ return v >= 1000 ? 'R$'+(v/1000).toFixed(1)+'k' : brl(v); };
+var n = function(id){ return parseFloat(document.getElementById(id).value)||0; };
+var el = function(id){ return document.getElementById(id); };
+
+// ─── Lançador ────────────────────────────────────────────────────────────────
+function addGasto(){
+  var inp = el('lancVal');
+  var v = parseFloat(inp.value);
+  if(!v||v<=0){ inp.focus(); return; }
+  gastosVar.push({id:Date.now(), cat:el('lancCat').value, desc:el('lancDesc').value.trim(), valor:v});
+  renderGastos();
+  inp.value=''; el('lancDesc').value=''; inp.focus();
+  calc();
+}
+
+function removeGasto(id){
+  gastosVar = gastosVar.filter(function(g){return g.id!==id;});
+  renderGastos(); calc();
+}
+
+function renderGastos(){
+  var gl = el('glist');
+  if(!gastosVar.length){ gl.innerHTML=''; return; }
+  gl.innerHTML = gastosVar.map(function(g){
+    return '<div class="gitem">'
+      +'<div class="gitem-l"><div class="gitem-cat">'+g.cat+'</div>'
+      +(g.desc?'<div class="gitem-desc">'+g.desc+'</div>':'')
+      +'</div><div class="gitem-r">'
+      +'<span class="gitem-val">'+brl(g.valor)+'</span>'
+      +'<button class="gitem-rm" onclick="removeGasto('+g.id+')">✕</button>'
+      +'</div></div>';
+  }).join('');
+}
+
+// ─── Calc ────────────────────────────────────────────────────────────────────
+function calc(){
+  var aulas = n('aulasQtd'), prod = aulas*200;
+  var totalRec = prod + n('podcast') + n('pai') + n('outrasRec');
+  el('lProd').textContent = brl(prod);
+  el('lRec').textContent = brl(totalRec);
+  el('sRec').textContent = brl(totalRec);
+
+  var fixos = n('cartao')+n('internet')+n('adobe')+n('smartfit')+n('hbo')+n('yt')+n('icloud')+n('gone')+n('gdrive');
+  el('lFix').textContent = brl(fixos);
+
+  var varTotal = gastosVar.reduce(function(s,g){return s+g.valor;},0);
+  el('lVar').textContent = brl(varTotal);
+  el('lVarTotal').textContent = brl(varTotal);
+
+  var totalGasto = fixos + varTotal;
+  el('sGasto').textContent = brl(totalGasto);
+
+  var sobra = totalRec - totalGasto;
+  var pct = totalRec>0 ? Math.round(sobra/totalRec*100) : 0;
+  var box = el('sobrabox');
+  box.className = 'sobrabox '+(sobra>=0?'pos':'neg');
+  el('sobraLbl').textContent = sobra>=0 ? 'Sobra do mês' : 'Déficit do mês';
+  el('sobraVal').textContent = brl(Math.abs(sobra));
+  el('sobraPct').textContent = Math.abs(pct)+'%';
+  el('g30').textContent = brl(totalRec*0.3);
+  el('g40').textContent = brl(totalRec*0.4);
+
+  var pf=n('saldoPF'), cx=n('saldoCaixinha'), pj=n('saldoPJ');
+  el('lContas').textContent = brl(pf+cx+pj);
+  el('lPatr').textContent = brl(pf+cx+pj);
+
+  var grd = n('guardado');
+  var p1 = Math.min(100,grd/5000*100), p2 = Math.min(100,grd/10000*100);
+  el('m1b').style.width=p1+'%'; el('m2b').style.width=p2+'%';
+  el('m1n').textContent = brl(grd)+' / '+brl(5000);
+  el('m2n').textContent = brl(grd)+' / '+brl(10000);
+  el('m1f').textContent = grd>=5000 ? '✅ Meta atingida!' : 'Falta '+brl(5000-grd);
+  el('m2f').textContent = grd>=10000 ? '✅ Meta atingida!' : 'Falta '+brl(10000-grd);
+  el('lMeta').textContent = Math.round(p2)+'% da meta final';
+
+  save();
+}
+
+// ─── Save / Load ─────────────────────────────────────────────────────────────
+function save(){
+  var mes = el('mesSelect').value;
+  var ids = ['aulasQtd','podcast','pai','outrasRec','cartao','internet','adobe','smartfit','hbo','yt','icloud','gone','gdrive','saldoPF','saldoCaixinha','saldoPJ','guardado'];
+  var d = {};
+  ids.forEach(function(id){ d[id]=el(id).value; });
+  d.gastosVar = gastosVar;
+  IDB.set(mes, d).catch(function(){});
+}
+
+function load(){
+  var mes = el('mesSelect').value;
+  gastosVar = [];
+  IDB.get(mes).then(function(d){
+    if(d){
+      ['aulasQtd','podcast','pai','outrasRec','cartao','internet','adobe','smartfit','hbo','yt','icloud','gone','gdrive','saldoPF','saldoCaixinha','saldoPJ','guardado'].forEach(function(id){
+        if(d[id]!==undefined && el(id)) el(id).value = d[id];
+      });
+      gastosVar = d.gastosVar||[];
+    }
+    renderGastos(); calc();
+  }).catch(function(){ renderGastos(); calc(); });
+}
+
+// ─── Toggle section ───────────────────────────────────────────────────────────
+function tog(hdr){
+  var body = hdr.nextElementSibling;
+  body.classList.toggle('hide');
+  hdr.parentElement.classList.toggle('collapsed');
+}
+
+// ─── Page switch ─────────────────────────────────────────────────────────────
+function showPage(id, btn){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
+  el('page-'+id).classList.add('on');
+  btn.classList.add('on');
+  if(id==='hist') renderHist();
+}
+
+// ─── Histórico ───────────────────────────────────────────────────────────────
+var MESES = ['Jan/2025','Fev/2025','Mar/2025','Abr/2025','Mai/2025','Jun/2025','Jul/2025','Ago/2025','Set/2025','Out/2025','Nov/2025','Dez/2025'];
+var MLBL  = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+function renderHist(){
+  Promise.all(MESES.map(function(m){ return IDB.get(m).catch(function(){return null;}); })).then(function(all){
+    var rows = all.map(function(d,i){
+      if(!d) return null;
+      var g = function(id){ return parseFloat(d[id])||0; };
+      var gv = (d.gastosVar||[]).reduce(function(s,x){return s+x.valor;},0);
+      var aulas = g('aulasQtd');
+      var rec = aulas*200+g('podcast')+g('pai')+g('outrasRec');
+      var fixos = g('cartao')+g('internet')+g('adobe')+g('smartfit')+g('hbo')+g('yt')+g('icloud')+g('gone')+g('gdrive');
+      var gastos = fixos+gv, sobra = rec-gastos;
+      if(rec===0&&gastos===0) return null;
+      return {mes:MLBL[i],aulas:aulas,rec:rec,gastos:gastos,sobra:sobra};
+    });
+
+    var com = rows.filter(Boolean);
+    var sRec=0,sGasto=0;
+    com.forEach(function(r){sRec+=r.rec;sGasto+=r.gastos;});
+    var guardado = parseFloat((all[MESES.indexOf(el('mesSelect').value)]||{}).guardado)||0;
+    el('hRec').textContent = brlk(sRec);
+    el('hGasto').textContent = brlk(sGasto);
+    el('hGuardado').textContent = brlk(guardado);
+
+    // Pizza SVG
+    drawPizza(sGasto, Math.max(0,sRec-sGasto));
+
+    // Tabela
+    if(!com.length){
+      el('htbody').innerHTML='<div class="hempty">Nenhum mês registrado ainda.<br>Preencha o dashboard primeiro!</div>';
+      el('htot').style.display='none'; return;
+    }
+    el('htbody').innerHTML = rows.map(function(r,i){
+      if(!r) return '<div class="htr"><div class="htd dim">'+MLBL[i]+'</div><div class="htd dim">—</div><div class="htd dim">—</div><div class="htd dim">—</div><div class="htd dim">—</div></div>';
+      return '<div class="htr">'
+        +'<div class="htd">'+r.mes+'</div>'
+        +'<div class="htd g">'+brlk(r.rec)+'</div>'
+        +'<div class="htd r">'+brlk(r.gastos)+'</div>'
+        +'<div class="htd '+(r.sobra>=0?'a':'r')+'">'+brlk(r.sobra)+'</div>'
+        +'<div class="htd">'+r.aulas+'</div>'
+        +'</div>';
+    }).join('');
+    var sSobra = com.reduce(function(s,r){return s+r.sobra;},0);
+    var sAulas = com.reduce(function(s,r){return s+r.aulas;},0);
+    el('htRec').textContent=brlk(sRec);
+    el('htGasto').textContent=brlk(sGasto);
+    el('htSobra').textContent=brlk(sSobra);
+    el('htAulas').textContent=sAulas;
+    el('htot').style.display='grid';
+  });
+}
+
+function drawPizza(gastos, guardado){
+  var total = gastos+guardado;
+  var svg = el('pizzaSvg');
+  if(!total){ svg.innerHTML='<circle cx="55" cy="55" r="40" fill="none" stroke="#2a2a35" stroke-width="18"/>'; el('pizzaLegend').innerHTML=''; return; }
+  var cx=55,cy=55,r=36,sw=18;
+  var pG = gastos/total, pS = guardado/total;
+  function arc(pct,color,offset){
+    var circ = 2*Math.PI*r;
+    var dash = pct*circ, gap = circ-dash;
+    return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="'+sw+'" stroke-dasharray="'+dash+' '+gap+'" stroke-dashoffset="'+offset+'" transform="rotate(-90 '+cx+' '+cy+')" />';
   }
-  .input-label .emoji { margin-right: 6px; }
-  .input-label .sublabel {
-    display: block;
-    font-size: 10px;
-    color: #44445a;
-    margin-top: 1px;
+  var circ = 2*Math.PI*r;
+  var offsetS = -pG*circ;
+  svg.innerHTML = arc(pG,'#f87171',0) + arc(pS,'#34d399',offsetS)
+    + '<text x="'+cx+'" y="'+(cy+4)+'" text-anchor="middle" fill="#f0f0f5" font-size="11" font-weight="700" font-family="-apple-system,sans-serif">'
+    + Math.round(pS*100)+'%</text>';
+  el('pizzaLegend').innerHTML =
+    '<div class="pizza-item"><div class="pizza-dot" style="background:#f87171"></div><div class="pizza-item-lbl">Gastos</div><div class="pizza-item-val" style="color:#f87171">'+brlk(gastos)+'</div><span class="pizza-item-pct">'+Math.round(pG*100)+'%</span></div>'
+   +'<div class="pizza-item"><div class="pizza-dot" style="background:#34d399"></div><div class="pizza-item-lbl">Guardado</div><div class="pizza-item-val" style="color:#34d399">'+brlk(guardado)+'</div><span class="pizza-item-pct">'+Math.round(pS*100)+'%</span></div>';
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+el('mesSelect').addEventListener('change', load);
+load();
+</script>
+</body>
+</html>
