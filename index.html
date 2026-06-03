@@ -392,6 +392,7 @@ async function save(){
     await setDoc(doc(db,'meses',mes), d);
     syncStatus('ok','Salvo ✓ — sincronizado entre dispositivos');
   } catch(e){
+    console.error('Firebase save error:', e.code, e.message);
     syncStatus('err','Erro ao salvar — verifique a conexão');
   }
 }
