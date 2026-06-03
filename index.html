@@ -2,46 +2,41 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Painel $">
 <title>Painel Financeiro</title>
 <style>
-:root {
-  --bg:#0d0d0f; --surface:#16161a; --surface2:#1e1e24; --border:#2a2a35;
-  --accent:#a78bfa; --accent2:#7c3aed; --green:#34d399; --green-dim:#052e16;
-  --red:#f87171; --red-dim:#450a0a; --yellow:#fbbf24; --text:#f0f0f5; --muted:#6b6b80;
-}
+:root{--bg:#0d0d0f;--surface:#16161a;--surface2:#1e1e24;--border:#2a2a35;--accent:#a78bfa;--accent2:#7c3aed;--green:#34d399;--green-dim:#052e16;--red:#f87171;--red-dim:#450a0a;--yellow:#fbbf24;--text:#f0f0f5;--muted:#6b6b80;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;min-height:100vh;padding:20px 16px 80px;font-size:14px;}
 .wrap{max-width:640px;margin:0 auto;}
-
-/* Header */
 .hdr{margin-bottom:20px;}
 .hdr-tag{font-size:11px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
 .hdr h1{font-size:24px;font-weight:800;letter-spacing:-0.5px;}
 .hdr h1 span{color:var(--accent);}
-
+/* Sync status */
+.sync-bar{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin-bottom:16px;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .3s;}
+.sync-dot.ok{background:var(--green);}
+.sync-dot.saving{background:var(--yellow);}
+.sync-dot.err{background:var(--red);}
 /* Tabs */
 .tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:20px;}
-.tab{flex:1;text-align:center;padding:9px;border-radius:8px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;border:none;background:none;transition:all .15s;}
+.tab{flex:1;text-align:center;padding:9px;border-radius:8px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;border:none;background:none;transition:all .15s;-webkit-tap-highlight-color:transparent;}
 .tab.on{background:var(--accent2);color:#fff;}
-
-/* Pages */
-.page{display:none;} .page.on{display:block;}
-
+.page{display:none;}.page.on{display:block;}
 /* Section */
 .sec{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:12px;overflow:hidden;}
-.sec-hdr{padding:13px 16px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;}
-.sec-hdr:hover{background:#22222c;}
+.sec-hdr{padding:13px 16px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;}
+.sec-hdr:active{background:#22222c;}
 .sec-title{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
 .sec-total{font-size:14px;color:var(--text);}
 .sec-icon{color:var(--muted);font-size:11px;transition:transform .2s;}
 .sec.collapsed .sec-icon{transform:rotate(-90deg);}
 .sec-body{padding:14px 16px;}
 .sec-body.hide{display:none;}
-
 /* Rows */
 .row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
 .row:last-child{margin-bottom:0;}
@@ -55,16 +50,11 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .ipfx{padding:0 7px;font-size:11px;color:var(--muted);background:var(--surface2);height:34px;display:flex;align-items:center;border-right:1px solid var(--border);}
 .ifield input{background:transparent;border:none;color:var(--accent);font-size:13px;padding:0 8px;width:100%;height:34px;text-align:right;-webkit-appearance:none;}
 .ifield input:focus{outline:none;}
-
-/* Calc row */
 .crow{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);margin:10px 0;}
 .crow-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
 .crow-val{font-size:14px;font-weight:600;color:var(--green);}
-
-/* Divider */
 .div{height:1px;background:var(--border);margin:10px 0;}
 .sub-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
-
 /* Lançador */
 .lanc{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px;display:flex;flex-direction:column;gap:8px;}
 .lanc select,.lanc .desc-in{width:100%;background:#1a1a22;border:1px solid var(--border);color:var(--text);font-size:12px;padding:8px 10px;border-radius:8px;-webkit-appearance:none;appearance:none;}
@@ -73,8 +63,6 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .lanc-bottom{display:flex;gap:8px;}
 .add-btn{background:var(--accent2);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;padding:0 16px;height:34px;cursor:pointer;white-space:nowrap;flex-shrink:0;-webkit-tap-highlight-color:transparent;}
 .add-btn:active{opacity:.8;}
-
-/* Gasto items */
 .glist{display:flex;flex-direction:column;gap:6px;}
 .gitem{display:flex;align-items:center;justify-content:space-between;background:#1a1a22;border:1px solid var(--border);border-radius:8px;padding:8px 12px;}
 .gitem-l{flex:1;min-width:0;}
@@ -82,9 +70,8 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .gitem-desc{font-size:10px;color:var(--muted);}
 .gitem-r{display:flex;align-items:center;gap:8px;flex-shrink:0;}
 .gitem-val{font-size:13px;color:var(--red);font-weight:600;}
-.gitem-rm{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 4px;-webkit-tap-highlight-color:transparent;}
+.gitem-rm{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 6px;-webkit-tap-highlight-color:transparent;}
 .gitem-rm:active{color:var(--red);}
-
 /* Summary */
 .sumcard{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 16px;margin-bottom:12px;}
 .sumcard-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
@@ -92,7 +79,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .sc{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;}
 .sc-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;}
 .sc-val{font-size:18px;font-weight:600;}
-.sc-val.g{color:var(--green);} .sc-val.r{color:var(--red);} .sc-val.a{color:var(--accent);}
+.sc-val.g{color:var(--green);}.sc-val.r{color:var(--red);}
 .sobrabox{border-radius:12px;padding:16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
 .sobrabox.pos{background:linear-gradient(135deg,var(--green-dim),#052e16);border:1px solid rgba(52,211,153,.2);}
 .sobrabox.neg{background:linear-gradient(135deg,var(--red-dim),#2d0a0a);border:1px solid rgba(248,113,113,.2);}
@@ -109,7 +96,6 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .gc{flex:1;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:10px;padding:11px;text-align:center;}
 .gc-lbl{font-size:10px;color:var(--accent);margin-bottom:4px;}
 .gc-val{font-size:15px;font-weight:600;color:var(--text);}
-
 /* Metas */
 .meta{margin-bottom:14px;}
 .meta-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;}
@@ -118,7 +104,6 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .pbar{height:6px;background:var(--border);border-radius:99px;overflow:hidden;}
 .pfill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width .4s ease;}
 .meta-falta{font-size:10px;color:var(--muted);margin-top:3px;}
-
 /* Contas */
 .cgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
 .ccard{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;}
@@ -127,26 +112,20 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .ctotal{background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.15);border-radius:10px;padding:11px 14px;display:flex;justify-content:space-between;align-items:center;margin-top:10px;}
 .ctotal-lbl{font-size:10px;color:rgba(52,211,153,.6);text-transform:uppercase;letter-spacing:1px;}
 .ctotal-val{font-size:17px;font-weight:600;color:var(--green);}
-
 /* Histórico */
 .hstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
 .hstat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;}
 .hstat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;}
 .hstat-val{font-size:15px;font-weight:600;}
-
-/* Pizza chart */
 .pizza-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;}
 .pizza-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
 .pizza-row{display:flex;align-items:center;gap:12px;}
-.pizza-svg{flex-shrink:0;}
 .pizza-legend{flex:1;display:flex;flex-direction:column;gap:8px;}
 .pizza-item{display:flex;align-items:center;gap:8px;}
 .pizza-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
 .pizza-item-lbl{font-size:11px;color:var(--muted);flex:1;}
 .pizza-item-val{font-size:13px;font-weight:600;}
 .pizza-item-pct{font-size:11px;color:var(--muted);margin-left:4px;}
-
-/* Tabela hist */
 .htable{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:12px;}
 .hth-row,.htr,.htot{display:grid;grid-template-columns:52px 1fr 1fr 1fr 42px;padding:9px 12px;}
 .hth-row{background:var(--surface2);border-bottom:1px solid var(--border);}
@@ -156,8 +135,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .htr:last-child{border-bottom:none;}
 .htd{font-size:11px;text-align:right;display:flex;align-items:center;justify-content:flex-end;}
 .htd:first-child{color:var(--muted);justify-content:flex-start;}
-.htd.g{color:var(--green);} .htd.r{color:var(--red);} .htd.a{color:var(--accent);}
-.htd.dim{opacity:.3;}
+.htd.g{color:var(--green);}.htd.r{color:var(--red);}.htd.a{color:var(--accent);}.htd.dim{opacity:.3;}
 .htot{background:var(--surface2);border-top:1px solid var(--border);}
 .htot-td{font-size:11px;font-weight:700;text-align:right;display:flex;align-items:center;justify-content:flex-end;}
 .htot-td:first-child{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);justify-content:flex-start;}
@@ -172,15 +150,18 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   <h1>Controle <span>Mensal</span></h1>
 </div>
 
+<div class="sync-bar">
+  <div class="sync-dot" id="syncDot"></div>
+  <span id="syncMsg">Conectando...</span>
+</div>
+
 <div class="tabs">
   <button class="tab on" onclick="showPage('dash',this)">📊 Dashboard</button>
   <button class="tab" onclick="showPage('hist',this)">📅 Histórico</button>
 </div>
 
-<!-- ═══════════════ DASHBOARD ═══════════════ -->
+<!-- DASHBOARD -->
 <div id="page-dash" class="page on">
-
-  <!-- Mês -->
   <div style="margin-bottom:16px;">
     <select id="mesSelect" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:13px;padding:9px 12px;border-radius:10px;-webkit-appearance:none;appearance:none;">
       <option value="Jan/2025">Janeiro 2025</option>
@@ -198,50 +179,23 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     </select>
   </div>
 
-  <!-- RECEITAS -->
   <div class="sec">
-    <div class="sec-hdr" onclick="tog(this)">
-      <span class="sec-title">📥 Receitas</span>
-      <span class="sec-total" id="lRec">R$ 0,00</span>
-      <span class="sec-icon">▼</span>
-    </div>
+    <div class="sec-hdr" onclick="tog(this)"><span class="sec-title">📥 Receitas</span><span class="sec-total" id="lRec">R$ 0,00</span><span class="sec-icon">▼</span></div>
     <div class="sec-body">
-      <div class="row">
-        <div class="lbl">🎬 Aulas editadas (qtd)<span class="sub">× R$ 200 = total produtora</span></div>
-        <div class="ifield"><input type="number" id="aulasQtd" value="20" min="0" inputmode="numeric" oninput="calc()"></div>
-        <span class="tag tag-v">VAR</span>
-      </div>
+      <div class="row"><div class="lbl">🎬 Aulas editadas (qtd)<span class="sub">× R$ 200 = total produtora</span></div><div class="ifield"><input type="number" id="aulasQtd" value="20" min="0" inputmode="numeric" oninput="calc()"></div><span class="tag tag-v">VAR</span></div>
       <div class="crow"><span class="crow-lbl">Total produtora</span><span class="crow-val" id="lProd">R$ 4.000,00</span></div>
-      <div class="row">
-        <div class="lbl">🎙️ Podcast</div>
-        <div class="ifield"><span class="ipfx">R$</span><input type="number" id="podcast" value="350" min="0" inputmode="decimal" oninput="calc()"></div>
-        <span class="tag tag-v">VAR</span>
-      </div>
-      <div class="row">
-        <div class="lbl">👨‍👩‍👦 Fixo (pai)</div>
-        <div class="ifield"><span class="ipfx">R$</span><input type="number" id="pai" value="650" min="0" inputmode="decimal" oninput="calc()"></div>
-        <span class="tag tag-f">FIXO</span>
-      </div>
-      <div class="row">
-        <div class="lbl">➕ Outras receitas</div>
-        <div class="ifield"><span class="ipfx">R$</span><input type="number" id="outrasRec" value="0" min="0" inputmode="decimal" oninput="calc()"></div>
-        <span class="tag tag-v">VAR</span>
-      </div>
+      <div class="row"><div class="lbl">🎙️ Podcast</div><div class="ifield"><span class="ipfx">R$</span><input type="number" id="podcast" value="350" min="0" inputmode="decimal" oninput="calc()"></div><span class="tag tag-v">VAR</span></div>
+      <div class="row"><div class="lbl">👨‍👩‍👦 Fixo (pai)</div><div class="ifield"><span class="ipfx">R$</span><input type="number" id="pai" value="650" min="0" inputmode="decimal" oninput="calc()"></div><span class="tag tag-f">FIXO</span></div>
+      <div class="row"><div class="lbl">➕ Outras receitas</div><div class="ifield"><span class="ipfx">R$</span><input type="number" id="outrasRec" value="0" min="0" inputmode="decimal" oninput="calc()"></div><span class="tag tag-v">VAR</span></div>
     </div>
   </div>
 
-  <!-- GASTOS FIXOS -->
   <div class="sec">
-    <div class="sec-hdr" onclick="tog(this)">
-      <span class="sec-title">📌 Gastos Fixos</span>
-      <span class="sec-total" id="lFix">R$ 0,00</span>
-      <span class="sec-icon">▼</span>
-    </div>
+    <div class="sec-hdr" onclick="tog(this)"><span class="sec-title">📌 Gastos Fixos</span><span class="sec-total" id="lFix">R$ 0,00</span><span class="sec-icon">▼</span></div>
     <div class="sec-body">
       <div class="row"><div class="lbl">💳 Cartão fixo</div><div class="ifield"><span class="ipfx">R$</span><input type="number" id="cartao" value="340" min="0" inputmode="decimal" oninput="calc()"></div><span class="tag tag-f">FIXO</span></div>
       <div class="row"><div class="lbl">📱 Telefone + Internet<span class="sub">Você + mãe</span></div><div class="ifield"><span class="ipfx">R$</span><input type="number" id="internet" value="440" min="0" inputmode="decimal" oninput="calc()"></div><span class="tag tag-f">FIXO</span></div>
-      <div class="div"></div>
-      <div class="sub-lbl">Assinaturas</div>
+      <div class="div"></div><div class="sub-lbl">Assinaturas</div>
       <div class="row"><div class="lbl">🎨 Adobe Creative</div><div class="ifield"><span class="ipfx">R$</span><input type="number" id="adobe" value="83.14" min="0" inputmode="decimal" oninput="calc()"></div><span class="tag tag-f">FIXO</span></div>
       <div class="row"><div class="lbl">🏋️ Smart Fit</div><div class="ifield"><span class="ipfx">R$</span><input type="number" id="smartfit" value="140" min="0" inputmode="decimal" oninput="calc()"></div><span class="tag tag-f">FIXO</span></div>
       <div class="row"><div class="lbl">📺 HBO Max</div><div class="ifield"><span class="ipfx">R$</span><input type="number" id="hbo" value="44.90" min="0" inputmode="decimal" oninput="calc()"></div><span class="tag tag-f">FIXO</span></div>
@@ -252,25 +206,11 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     </div>
   </div>
 
-  <!-- GASTOS VARIÁVEIS -->
   <div class="sec">
-    <div class="sec-hdr" onclick="tog(this)">
-      <span class="sec-title">🛒 Gastos Variáveis</span>
-      <span class="sec-total" id="lVar">R$ 0,00</span>
-      <span class="sec-icon">▼</span>
-    </div>
+    <div class="sec-hdr" onclick="tog(this)"><span class="sec-title">🛒 Gastos Variáveis</span><span class="sec-total" id="lVar">R$ 0,00</span><span class="sec-icon">▼</span></div>
     <div class="sec-body">
       <div class="lanc">
-        <select id="lancCat">
-          <option>🛒 Mercado / Alimentação</option>
-          <option>🚗 Transporte (Uber etc)</option>
-          <option>👕 Roupas / Compras</option>
-          <option>🔧 Trabalho / Ferramentas</option>
-          <option>🍔 Delivery / Restaurante</option>
-          <option>💊 Saúde / Farmácia</option>
-          <option>🎮 Lazer / Entretenimento</option>
-          <option>➕ Outro</option>
-        </select>
+        <select id="lancCat"><option>🛒 Mercado / Alimentação</option><option>🚗 Transporte (Uber etc)</option><option>👕 Roupas / Compras</option><option>🔧 Trabalho / Ferramentas</option><option>🍔 Delivery / Restaurante</option><option>💊 Saúde / Farmácia</option><option>🎮 Lazer / Entretenimento</option><option>➕ Outro</option></select>
         <input type="text" class="desc-in" id="lancDesc" placeholder="Descrição (opcional)" maxlength="40">
         <div class="lanc-bottom">
           <div class="ifield" style="flex:1"><span class="ipfx">R$</span><input type="number" id="lancVal" placeholder="0,00" min="0" inputmode="decimal" onkeydown="if(event.key==='Enter')addGasto()"></div>
@@ -282,13 +222,8 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     </div>
   </div>
 
-  <!-- SALDO DAS CONTAS -->
   <div class="sec">
-    <div class="sec-hdr" onclick="tog(this)">
-      <span class="sec-title">🏦 Saldo das Contas</span>
-      <span class="sec-total" id="lContas">R$ 0,00</span>
-      <span class="sec-icon">▼</span>
-    </div>
+    <div class="sec-hdr" onclick="tog(this)"><span class="sec-title">🏦 Saldo das Contas</span><span class="sec-total" id="lContas">R$ 0,00</span><span class="sec-icon">▼</span></div>
     <div class="sec-body">
       <div class="cgrid">
         <div class="ccard"><div class="ccard-lbl">🏧 Conta PF</div><div class="ifield"><span class="ipfx">R$</span><input type="number" id="saldoPF" value="1350" min="0" inputmode="decimal" oninput="calc()"></div></div>
@@ -299,7 +234,6 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     </div>
   </div>
 
-  <!-- RESUMO -->
   <div class="sumcard">
     <div class="sumcard-title">📊 Resumo do Mês</div>
     <div class="sg">
@@ -317,61 +251,35 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     </div>
   </div>
 
-  <!-- METAS -->
   <div class="sec">
-    <div class="sec-hdr" onclick="tog(this)">
-      <span class="sec-title">🎯 Metas</span>
-      <span class="sec-total" id="lMeta"></span>
-      <span class="sec-icon">▼</span>
-    </div>
+    <div class="sec-hdr" onclick="tog(this)"><span class="sec-title">🎯 Metas</span><span class="sec-total" id="lMeta"></span><span class="sec-icon">▼</span></div>
     <div class="sec-body">
-      <div class="meta">
-        <div class="meta-top"><span class="meta-name">🥇 Meta 1 — R$ 5.000</span><span class="meta-nums" id="m1n">—</span></div>
-        <div class="pbar"><div class="pfill" id="m1b" style="width:0%"></div></div>
-        <div class="meta-falta" id="m1f"></div>
-      </div>
-      <div class="meta">
-        <div class="meta-top"><span class="meta-name">🥈 Meta 2 — R$ 10.000</span><span class="meta-nums" id="m2n">—</span></div>
-        <div class="pbar"><div class="pfill" id="m2b" style="width:0%"></div></div>
-        <div class="meta-falta" id="m2f"></div>
-      </div>
+      <div class="meta"><div class="meta-top"><span class="meta-name">🥇 Meta 1 — R$ 5.000</span><span class="meta-nums" id="m1n">—</span></div><div class="pbar"><div class="pfill" id="m1b" style="width:0%"></div></div><div class="meta-falta" id="m1f"></div></div>
+      <div class="meta"><div class="meta-top"><span class="meta-name">🥈 Meta 2 — R$ 10.000</span><span class="meta-nums" id="m2n">—</span></div><div class="pbar"><div class="pfill" id="m2b" style="width:0%"></div></div><div class="meta-falta" id="m2f"></div></div>
       <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px;">
         <div class="sub-lbl">Total na caixinha hoje</div>
-        <div class="row" style="margin-bottom:0">
-          <div class="lbl">💰 Guardado</div>
-          <div class="ifield"><span class="ipfx">R$</span><input type="number" id="guardado" value="1500" min="0" inputmode="decimal" oninput="calc()"></div>
-        </div>
+        <div class="row" style="margin-bottom:0"><div class="lbl">💰 Guardado</div><div class="ifield"><span class="ipfx">R$</span><input type="number" id="guardado" value="1500" min="0" inputmode="decimal" oninput="calc()"></div></div>
       </div>
     </div>
   </div>
+</div>
 
-</div><!-- end dash -->
-
-<!-- ═══════════════ HISTÓRICO ═══════════════ -->
+<!-- HISTÓRICO -->
 <div id="page-hist" class="page">
-
   <div class="hstats">
-    <div class="hstat"><div class="hstat-lbl">Recebido</div><div class="hstat-val" style="color:var(--green)" id="hRec">R$ 0</div></div>
-    <div class="hstat"><div class="hstat-lbl">Gasto</div><div class="hstat-val" style="color:var(--red)" id="hGasto">R$ 0</div></div>
-    <div class="hstat"><div class="hstat-lbl">Guardado</div><div class="hstat-val" style="color:var(--yellow)" id="hGuardado">R$ 0</div></div>
+    <div class="hstat"><div class="hstat-lbl">Recebido</div><div class="hstat-val" style="color:var(--green)" id="hRec">—</div></div>
+    <div class="hstat"><div class="hstat-lbl">Gasto</div><div class="hstat-val" style="color:var(--red)" id="hGasto">—</div></div>
+    <div class="hstat"><div class="hstat-lbl">Guardado</div><div class="hstat-val" style="color:var(--yellow)" id="hGuardado">—</div></div>
   </div>
-
   <div class="pizza-wrap">
     <div class="pizza-title">🍩 Distribuição anual</div>
     <div class="pizza-row">
-      <svg class="pizza-svg" id="pizzaSvg" width="110" height="110" viewBox="0 0 110 110"></svg>
+      <svg id="pizzaSvg" width="110" height="110" viewBox="0 0 110 110" style="flex-shrink:0"></svg>
       <div class="pizza-legend" id="pizzaLegend"></div>
     </div>
   </div>
-
   <div class="htable">
-    <div class="hth-row">
-      <div class="hth">Mês</div>
-      <div class="hth">Receitas</div>
-      <div class="hth">Gastos</div>
-      <div class="hth">Sobra</div>
-      <div class="hth">Aulas</div>
-    </div>
+    <div class="hth-row"><div class="hth">Mês</div><div class="hth">Receitas</div><div class="hth">Gastos</div><div class="hth">Sobra</div><div class="hth">Aulas</div></div>
     <div id="htbody"></div>
     <div class="htot" id="htot" style="display:none">
       <div class="htot-td">Total</div>
@@ -381,243 +289,206 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
       <div class="htot-td" id="htAulas">—</div>
     </div>
   </div>
+</div>
 
-</div><!-- end hist -->
+</div>
 
-</div><!-- wrap -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-<script>
-// ─── Storage via IndexedDB ───────────────────────────────────────────────────
-var IDB = (function(){
-  var db = null;
-  var DB = 'pf2', VER = 1, ST = 'meses';
-  function open(){
-    return new Promise(function(ok,err){
-      if(db) return ok(db);
-      var r = indexedDB.open(DB, VER);
-      r.onupgradeneeded = function(e){ e.target.result.createObjectStore(ST,{keyPath:'mes'}); };
-      r.onsuccess = function(e){ db = e.target.result; ok(db); };
-      r.onerror = function(){ err(r.error); };
-    });
-  }
-  return {
-    set: function(k,v){
-      return open().then(function(d){
-        return new Promise(function(ok,err){
-          var tx = d.transaction(ST,'readwrite');
-          tx.objectStore(ST).put(Object.assign({mes:k},v));
-          tx.oncomplete = ok; tx.onerror = function(){err(tx.error);};
-        });
-      });
-    },
-    get: function(k){
-      return open().then(function(d){
-        return new Promise(function(ok,err){
-          var r = d.transaction(ST).objectStore(ST).get(k);
-          r.onsuccess = function(){ ok(r.result||null); };
-          r.onerror = function(){ err(r.error); };
-        });
-      });
-    }
-  };
-})();
+const firebaseConfig = {
+  apiKey: "AIzaSyBovTjpI0sUU48aDn1kID-WhmhcpcNks3A",
+  authDomain: "painel-financeiro-ef6db.firebaseapp.com",
+  projectId: "painel-financeiro-ef6db",
+  storageBucket: "painel-financeiro-ef6db.firebasestorage.app",
+  messagingSenderId: "442319490660",
+  appId: "1:442319490660:web:d0187d7826b4619d355971"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
+const brl = v => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const brlk = v => v>=1000 ? 'R$'+(v/1000).toFixed(1)+'k' : brl(v);
+const n = id => parseFloat(document.getElementById(id).value)||0;
+const el = id => document.getElementById(id);
+
+// ─── Sync UI ─────────────────────────────────────────────────────────────────
+function syncStatus(state, msg){
+  el('syncDot').className = 'sync-dot '+state;
+  el('syncMsg').textContent = msg;
+}
+syncStatus('ok','Conectado — dados sincronizados entre dispositivos');
 
 // ─── State ───────────────────────────────────────────────────────────────────
-var gastosVar = [];
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-var brl = function(v){ return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); };
-var brlk = function(v){ return v >= 1000 ? 'R$'+(v/1000).toFixed(1)+'k' : brl(v); };
-var n = function(id){ return parseFloat(document.getElementById(id).value)||0; };
-var el = function(id){ return document.getElementById(id); };
+let gastosVar = [];
+let saveTimer = null;
 
 // ─── Lançador ────────────────────────────────────────────────────────────────
-function addGasto(){
-  var inp = el('lancVal');
-  var v = parseFloat(inp.value);
-  if(!v||v<=0){ inp.focus(); return; }
-  gastosVar.push({id:Date.now(), cat:el('lancCat').value, desc:el('lancDesc').value.trim(), valor:v});
-  renderGastos();
-  inp.value=''; el('lancDesc').value=''; inp.focus();
-  calc();
-}
+window.addGasto = function(){
+  const inp = el('lancVal');
+  const v = parseFloat(inp.value);
+  if(!v||v<=0){inp.focus();return;}
+  gastosVar.push({id:Date.now(),cat:el('lancCat').value,desc:el('lancDesc').value.trim(),valor:v});
+  renderGastos(); inp.value=''; el('lancDesc').value=''; inp.focus(); calc();
+};
 
-function removeGasto(id){
-  gastosVar = gastosVar.filter(function(g){return g.id!==id;});
+window.removeGasto = function(id){
+  gastosVar = gastosVar.filter(g=>g.id!==id);
   renderGastos(); calc();
-}
+};
 
 function renderGastos(){
-  var gl = el('glist');
-  if(!gastosVar.length){ gl.innerHTML=''; return; }
-  gl.innerHTML = gastosVar.map(function(g){
-    return '<div class="gitem">'
-      +'<div class="gitem-l"><div class="gitem-cat">'+g.cat+'</div>'
-      +(g.desc?'<div class="gitem-desc">'+g.desc+'</div>':'')
-      +'</div><div class="gitem-r">'
-      +'<span class="gitem-val">'+brl(g.valor)+'</span>'
-      +'<button class="gitem-rm" onclick="removeGasto('+g.id+')">✕</button>'
-      +'</div></div>';
-  }).join('');
+  const gl = el('glist');
+  if(!gastosVar.length){gl.innerHTML='';return;}
+  gl.innerHTML = gastosVar.map(g=>
+    `<div class="gitem"><div class="gitem-l"><div class="gitem-cat">${g.cat}</div>${g.desc?`<div class="gitem-desc">${g.desc}</div>`:''}</div><div class="gitem-r"><span class="gitem-val">${brl(g.valor)}</span><button class="gitem-rm" onclick="removeGasto(${g.id})">✕</button></div></div>`
+  ).join('');
 }
 
 // ─── Calc ────────────────────────────────────────────────────────────────────
-function calc(){
-  var aulas = n('aulasQtd'), prod = aulas*200;
-  var totalRec = prod + n('podcast') + n('pai') + n('outrasRec');
-  el('lProd').textContent = brl(prod);
-  el('lRec').textContent = brl(totalRec);
-  el('sRec').textContent = brl(totalRec);
-
-  var fixos = n('cartao')+n('internet')+n('adobe')+n('smartfit')+n('hbo')+n('yt')+n('icloud')+n('gone')+n('gdrive');
-  el('lFix').textContent = brl(fixos);
-
-  var varTotal = gastosVar.reduce(function(s,g){return s+g.valor;},0);
-  el('lVar').textContent = brl(varTotal);
-  el('lVarTotal').textContent = brl(varTotal);
-
-  var totalGasto = fixos + varTotal;
-  el('sGasto').textContent = brl(totalGasto);
-
-  var sobra = totalRec - totalGasto;
-  var pct = totalRec>0 ? Math.round(sobra/totalRec*100) : 0;
-  var box = el('sobrabox');
-  box.className = 'sobrabox '+(sobra>=0?'pos':'neg');
-  el('sobraLbl').textContent = sobra>=0 ? 'Sobra do mês' : 'Déficit do mês';
-  el('sobraVal').textContent = brl(Math.abs(sobra));
-  el('sobraPct').textContent = Math.abs(pct)+'%';
-  el('g30').textContent = brl(totalRec*0.3);
-  el('g40').textContent = brl(totalRec*0.4);
-
-  var pf=n('saldoPF'), cx=n('saldoCaixinha'), pj=n('saldoPJ');
-  el('lContas').textContent = brl(pf+cx+pj);
-  el('lPatr').textContent = brl(pf+cx+pj);
-
-  var grd = n('guardado');
-  var p1 = Math.min(100,grd/5000*100), p2 = Math.min(100,grd/10000*100);
+window.calc = function(){
+  const aulas=n('aulasQtd'), prod=aulas*200;
+  const totalRec=prod+n('podcast')+n('pai')+n('outrasRec');
+  el('lProd').textContent=brl(prod); el('lRec').textContent=brl(totalRec); el('sRec').textContent=brl(totalRec);
+  const fixos=n('cartao')+n('internet')+n('adobe')+n('smartfit')+n('hbo')+n('yt')+n('icloud')+n('gone')+n('gdrive');
+  el('lFix').textContent=brl(fixos);
+  const varTotal=gastosVar.reduce((s,g)=>s+g.valor,0);
+  el('lVar').textContent=brl(varTotal); el('lVarTotal').textContent=brl(varTotal);
+  const totalGasto=fixos+varTotal; el('sGasto').textContent=brl(totalGasto);
+  const sobra=totalRec-totalGasto, pct=totalRec>0?Math.round(sobra/totalRec*100):0;
+  el('sobrabox').className='sobrabox '+(sobra>=0?'pos':'neg');
+  el('sobraLbl').textContent=sobra>=0?'Sobra do mês':'Déficit do mês';
+  el('sobraVal').textContent=brl(Math.abs(sobra)); el('sobraPct').textContent=Math.abs(pct)+'%';
+  el('g30').textContent=brl(totalRec*0.3); el('g40').textContent=brl(totalRec*0.4);
+  const pf=n('saldoPF'),cx=n('saldoCaixinha'),pj=n('saldoPJ');
+  el('lContas').textContent=brl(pf+cx+pj); el('lPatr').textContent=brl(pf+cx+pj);
+  const grd=n('guardado');
+  const p1=Math.min(100,grd/5000*100),p2=Math.min(100,grd/10000*100);
   el('m1b').style.width=p1+'%'; el('m2b').style.width=p2+'%';
-  el('m1n').textContent = brl(grd)+' / '+brl(5000);
-  el('m2n').textContent = brl(grd)+' / '+brl(10000);
-  el('m1f').textContent = grd>=5000 ? '✅ Meta atingida!' : 'Falta '+brl(5000-grd);
-  el('m2f').textContent = grd>=10000 ? '✅ Meta atingida!' : 'Falta '+brl(10000-grd);
-  el('lMeta').textContent = Math.round(p2)+'% da meta final';
-
-  save();
-}
+  el('m1n').textContent=brl(grd)+' / '+brl(5000); el('m2n').textContent=brl(grd)+' / '+brl(10000);
+  el('m1f').textContent=grd>=5000?'✅ Meta atingida!':'Falta '+brl(5000-grd);
+  el('m2f').textContent=grd>=10000?'✅ Meta atingida!':'Falta '+brl(10000-grd);
+  el('lMeta').textContent=Math.round(p2)+'% da meta final';
+  scheduleSave();
+};
 
 // ─── Save / Load ─────────────────────────────────────────────────────────────
-function save(){
-  var mes = el('mesSelect').value;
-  var ids = ['aulasQtd','podcast','pai','outrasRec','cartao','internet','adobe','smartfit','hbo','yt','icloud','gone','gdrive','saldoPF','saldoCaixinha','saldoPJ','guardado'];
-  var d = {};
-  ids.forEach(function(id){ d[id]=el(id).value; });
-  d.gastosVar = gastosVar;
-  IDB.set(mes, d).catch(function(){});
+function scheduleSave(){
+  clearTimeout(saveTimer);
+  syncStatus('saving','Salvando...');
+  saveTimer = setTimeout(save, 1000);
 }
 
-function load(){
-  var mes = el('mesSelect').value;
+async function save(){
+  const mes = el('mesSelect').value;
+  const ids = ['aulasQtd','podcast','pai','outrasRec','cartao','internet','adobe','smartfit','hbo','yt','icloud','gone','gdrive','saldoPF','saldoCaixinha','saldoPJ','guardado'];
+  const d = {};
+  ids.forEach(id => d[id]=el(id).value);
+  d.gastosVar = gastosVar;
+  try {
+    await setDoc(doc(db,'meses',mes), d);
+    syncStatus('ok','Salvo ✓ — sincronizado entre dispositivos');
+  } catch(e){
+    syncStatus('err','Erro ao salvar — verifique a conexão');
+  }
+}
+
+async function load(){
+  const mes = el('mesSelect').value;
   gastosVar = [];
-  IDB.get(mes).then(function(d){
-    if(d){
-      ['aulasQtd','podcast','pai','outrasRec','cartao','internet','adobe','smartfit','hbo','yt','icloud','gone','gdrive','saldoPF','saldoCaixinha','saldoPJ','guardado'].forEach(function(id){
-        if(d[id]!==undefined && el(id)) el(id).value = d[id];
+  syncStatus('saving','Carregando...');
+  try {
+    const snap = await getDoc(doc(db,'meses',mes));
+    if(snap.exists()){
+      const d = snap.data();
+      ['aulasQtd','podcast','pai','outrasRec','cartao','internet','adobe','smartfit','hbo','yt','icloud','gone','gdrive','saldoPF','saldoCaixinha','saldoPJ','guardado'].forEach(id=>{
+        if(d[id]!==undefined && el(id)) el(id).value=d[id];
       });
       gastosVar = d.gastosVar||[];
     }
-    renderGastos(); calc();
-  }).catch(function(){ renderGastos(); calc(); });
+    syncStatus('ok','Conectado — dados sincronizados entre dispositivos');
+  } catch(e){
+    syncStatus('err','Sem conexão — alguns dados podem não estar atualizados');
+  }
+  renderGastos(); calc();
 }
 
-// ─── Toggle section ───────────────────────────────────────────────────────────
-function tog(hdr){
-  var body = hdr.nextElementSibling;
-  body.classList.toggle('hide');
+// ─── Toggle ──────────────────────────────────────────────────────────────────
+window.tog = function(hdr){
+  hdr.nextElementSibling.classList.toggle('hide');
   hdr.parentElement.classList.toggle('collapsed');
-}
+};
 
-// ─── Page switch ─────────────────────────────────────────────────────────────
-function showPage(id, btn){
-  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on');});
-  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
-  el('page-'+id).classList.add('on');
-  btn.classList.add('on');
+// ─── Pages ───────────────────────────────────────────────────────────────────
+window.showPage = function(id, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  el('page-'+id).classList.add('on'); btn.classList.add('on');
   if(id==='hist') renderHist();
-}
+};
 
 // ─── Histórico ───────────────────────────────────────────────────────────────
-var MESES = ['Jan/2025','Fev/2025','Mar/2025','Abr/2025','Mai/2025','Jun/2025','Jul/2025','Ago/2025','Set/2025','Out/2025','Nov/2025','Dez/2025'];
-var MLBL  = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const MESES=['Jan/2025','Fev/2025','Mar/2025','Abr/2025','Mai/2025','Jun/2025','Jul/2025','Ago/2025','Set/2025','Out/2025','Nov/2025','Dez/2025'];
+const MLBL=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
-function renderHist(){
-  Promise.all(MESES.map(function(m){ return IDB.get(m).catch(function(){return null;}); })).then(function(all){
-    var rows = all.map(function(d,i){
-      if(!d) return null;
-      var g = function(id){ return parseFloat(d[id])||0; };
-      var gv = (d.gastosVar||[]).reduce(function(s,x){return s+x.valor;},0);
-      var aulas = g('aulasQtd');
-      var rec = aulas*200+g('podcast')+g('pai')+g('outrasRec');
-      var fixos = g('cartao')+g('internet')+g('adobe')+g('smartfit')+g('hbo')+g('yt')+g('icloud')+g('gone')+g('gdrive');
-      var gastos = fixos+gv, sobra = rec-gastos;
+async function renderHist(){
+  el('htbody').innerHTML='<div class="hempty">Carregando...</div>';
+  try {
+    const snaps = await Promise.all(MESES.map(m=>getDoc(doc(db,'meses',m))));
+    const rows = snaps.map((snap,i)=>{
+      if(!snap.exists()) return null;
+      const d=snap.data();
+      const g=id=>parseFloat(d[id])||0;
+      const gv=(d.gastosVar||[]).reduce((s,x)=>s+x.valor,0);
+      const aulas=g('aulasQtd');
+      const rec=aulas*200+g('podcast')+g('pai')+g('outrasRec');
+      const fixos=g('cartao')+g('internet')+g('adobe')+g('smartfit')+g('hbo')+g('yt')+g('icloud')+g('gone')+g('gdrive');
+      const gastos=fixos+gv, sobra=rec-gastos;
       if(rec===0&&gastos===0) return null;
-      return {mes:MLBL[i],aulas:aulas,rec:rec,gastos:gastos,sobra:sobra};
+      return {mes:MLBL[i],aulas,rec,gastos,sobra,guardado:g('guardado')};
     });
-
-    var com = rows.filter(Boolean);
-    var sRec=0,sGasto=0;
-    com.forEach(function(r){sRec+=r.rec;sGasto+=r.gastos;});
-    var guardado = parseFloat((all[MESES.indexOf(el('mesSelect').value)]||{}).guardado)||0;
-    el('hRec').textContent = brlk(sRec);
-    el('hGasto').textContent = brlk(sGasto);
-    el('hGuardado').textContent = brlk(guardado);
-
-    // Pizza SVG
-    drawPizza(sGasto, Math.max(0,sRec-sGasto));
-
-    // Tabela
+    const com=rows.filter(Boolean);
+    const sRec=com.reduce((s,r)=>s+r.rec,0);
+    const sGasto=com.reduce((s,r)=>s+r.gastos,0);
+    const curIdx=MESES.indexOf(el('mesSelect').value);
+    const guardado=rows[curIdx]?rows[curIdx].guardado:0;
+    el('hRec').textContent=brlk(sRec);
+    el('hGasto').textContent=brlk(sGasto);
+    el('hGuardado').textContent=brlk(guardado);
+    drawPizza(sGasto,Math.max(0,sRec-sGasto));
     if(!com.length){
       el('htbody').innerHTML='<div class="hempty">Nenhum mês registrado ainda.<br>Preencha o dashboard primeiro!</div>';
       el('htot').style.display='none'; return;
     }
-    el('htbody').innerHTML = rows.map(function(r,i){
-      if(!r) return '<div class="htr"><div class="htd dim">'+MLBL[i]+'</div><div class="htd dim">—</div><div class="htd dim">—</div><div class="htd dim">—</div><div class="htd dim">—</div></div>';
-      return '<div class="htr">'
-        +'<div class="htd">'+r.mes+'</div>'
-        +'<div class="htd g">'+brlk(r.rec)+'</div>'
-        +'<div class="htd r">'+brlk(r.gastos)+'</div>'
-        +'<div class="htd '+(r.sobra>=0?'a':'r')+'">'+brlk(r.sobra)+'</div>'
-        +'<div class="htd">'+r.aulas+'</div>'
-        +'</div>';
+    el('htbody').innerHTML=rows.map((r,i)=>{
+      if(!r) return `<div class="htr"><div class="htd dim">${MLBL[i]}</div><div class="htd dim">—</div><div class="htd dim">—</div><div class="htd dim">—</div><div class="htd dim">—</div></div>`;
+      return `<div class="htr"><div class="htd">${r.mes}</div><div class="htd g">${brlk(r.rec)}</div><div class="htd r">${brlk(r.gastos)}</div><div class="htd ${r.sobra>=0?'a':'r'}">${brlk(r.sobra)}</div><div class="htd">${r.aulas}</div></div>`;
     }).join('');
-    var sSobra = com.reduce(function(s,r){return s+r.sobra;},0);
-    var sAulas = com.reduce(function(s,r){return s+r.aulas;},0);
-    el('htRec').textContent=brlk(sRec);
-    el('htGasto').textContent=brlk(sGasto);
-    el('htSobra').textContent=brlk(sSobra);
-    el('htAulas').textContent=sAulas;
+    const sSobra=com.reduce((s,r)=>s+r.sobra,0);
+    const sAulas=com.reduce((s,r)=>s+r.aulas,0);
+    el('htRec').textContent=brlk(sRec); el('htGasto').textContent=brlk(sGasto);
+    el('htSobra').textContent=brlk(sSobra); el('htAulas').textContent=sAulas;
     el('htot').style.display='grid';
-  });
+  } catch(e){
+    el('htbody').innerHTML='<div class="hempty">Erro ao carregar. Verifique a conexão.</div>';
+  }
 }
 
-function drawPizza(gastos, guardado){
-  var total = gastos+guardado;
-  var svg = el('pizzaSvg');
-  if(!total){ svg.innerHTML='<circle cx="55" cy="55" r="40" fill="none" stroke="#2a2a35" stroke-width="18"/>'; el('pizzaLegend').innerHTML=''; return; }
-  var cx=55,cy=55,r=36,sw=18;
-  var pG = gastos/total, pS = guardado/total;
-  function arc(pct,color,offset){
-    var circ = 2*Math.PI*r;
-    var dash = pct*circ, gap = circ-dash;
-    return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="'+sw+'" stroke-dasharray="'+dash+' '+gap+'" stroke-dashoffset="'+offset+'" transform="rotate(-90 '+cx+' '+cy+')" />';
-  }
-  var circ = 2*Math.PI*r;
-  var offsetS = -pG*circ;
-  svg.innerHTML = arc(pG,'#f87171',0) + arc(pS,'#34d399',offsetS)
-    + '<text x="'+cx+'" y="'+(cy+4)+'" text-anchor="middle" fill="#f0f0f5" font-size="11" font-weight="700" font-family="-apple-system,sans-serif">'
-    + Math.round(pS*100)+'%</text>';
-  el('pizzaLegend').innerHTML =
-    '<div class="pizza-item"><div class="pizza-dot" style="background:#f87171"></div><div class="pizza-item-lbl">Gastos</div><div class="pizza-item-val" style="color:#f87171">'+brlk(gastos)+'</div><span class="pizza-item-pct">'+Math.round(pG*100)+'%</span></div>'
-   +'<div class="pizza-item"><div class="pizza-dot" style="background:#34d399"></div><div class="pizza-item-lbl">Guardado</div><div class="pizza-item-val" style="color:#34d399">'+brlk(guardado)+'</div><span class="pizza-item-pct">'+Math.round(pS*100)+'%</span></div>';
+function drawPizza(gastos,guardado){
+  const total=gastos+guardado;
+  const svg=el('pizzaSvg');
+  if(!total){svg.innerHTML='<circle cx="55" cy="55" r="36" fill="none" stroke="#2a2a35" stroke-width="18"/>'; el('pizzaLegend').innerHTML=''; return;}
+  const cx=55,cy=55,r=36,sw=18,circ=2*Math.PI*r;
+  const pG=gastos/total,pS=guardado/total;
+  const arc=(pct,color,offset)=>`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-dasharray="${pct*circ} ${circ-pct*circ}" stroke-dashoffset="${offset}" transform="rotate(-90 ${cx} ${cy})"/>`;
+  svg.innerHTML=arc(pG,'#f87171',0)+arc(pS,'#34d399',-pG*circ)
+    +`<text x="${cx}" y="${cy+4}" text-anchor="middle" fill="#f0f0f5" font-size="11" font-weight="700" font-family="-apple-system,sans-serif">${Math.round(pS*100)}%</text>`;
+  el('pizzaLegend').innerHTML=
+    `<div class="pizza-item"><div class="pizza-dot" style="background:#f87171"></div><div class="pizza-item-lbl">Gastos</div><div class="pizza-item-val" style="color:#f87171">${brlk(gastos)}</div><span class="pizza-item-pct">${Math.round(pG*100)}%</span></div>`
+   +`<div class="pizza-item"><div class="pizza-dot" style="background:#34d399"></div><div class="pizza-item-lbl">Guardado</div><div class="pizza-item-val" style="color:#34d399">${brlk(guardado)}</div><span class="pizza-item-pct">${Math.round(pS*100)}%</span></div>`;
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
