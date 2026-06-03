@@ -379,6 +379,7 @@ window.calc = function(){
 function scheduleSave(){
   clearTimeout(saveTimer);
   syncStatus('saving','Salvando...');
+  console.log('scheduleSave called, starting timer...');
   saveTimer = setTimeout(save, 1000);
 }
 
