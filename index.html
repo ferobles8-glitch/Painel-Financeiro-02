@@ -384,11 +384,12 @@ function scheduleSave(){
 }
 
 async function save(){
-  const mes = el('mesSelect').value;
+  const mes = el('mesSelect').value.replace('/','_');
   const ids = ['aulasQtd','podcast','pai','outrasRec','cartao','internet','adobe','smartfit','hbo','yt','icloud','gone','gdrive','saldoPF','saldoCaixinha','saldoPJ','guardado'];
   const d = {};
   ids.forEach(id => d[id]=el(id).value);
   d.gastosVar = gastosVar;
+  d.mesLabel = el('mesSelect').value;
   try {
     await setDoc(doc(db,'meses',mes), d);
     syncStatus('ok','Salvo ✓ — sincronizado entre dispositivos');
@@ -400,10 +401,11 @@ async function save(){
 
 async function load(){
   const mes = el('mesSelect').value;
+  const mesKey = mes.replace('/','_');
   gastosVar = [];
   syncStatus('saving','Carregando...');
   try {
-    const snap = await getDoc(doc(db,'meses',mes));
+    const snap = await getDoc(doc(db,'meses',mesKey));
     if(snap.exists()){
       const d = snap.data();
       ['aulasQtd','podcast','pai','outrasRec','cartao','internet','adobe','smartfit','hbo','yt','icloud','gone','gdrive','saldoPF','saldoCaixinha','saldoPJ','guardado'].forEach(id=>{
@@ -439,7 +441,7 @@ const MLBL=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','D
 async function renderHist(){
   el('htbody').innerHTML='<div class="hempty">Carregando...</div>';
   try {
-    const snaps = await Promise.all(MESES.map(m=>getDoc(doc(db,'meses',m))));
+    const snaps = await Promise.all(MESES.map(m=>getDoc(doc(db,'meses',m.replace('/','_')))));
     const rows = snaps.map((snap,i)=>{
       if(!snap.exists()) return null;
       const d=snap.data();
