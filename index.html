@@ -10,7 +10,7 @@
 <style>
 :root{--bg:#0d0d0f;--surface:#16161a;--surface2:#1e1e24;--border:#2a2a35;--accent:#a78bfa;--accent2:#7c3aed;--green:#34d399;--green-dim:#052e16;--red:#f87171;--red-dim:#450a0a;--yellow:#fbbf24;--text:#f0f0f5;--muted:#6b6b80;}
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;min-height:100vh;padding:20px 16px 80px;font-size:14px;}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;min-height:100vh;padding:env(safe-area-inset-top, 20px) 16px 80px;padding-top:max(env(safe-area-inset-top), 20px);}
 .wrap{max-width:640px;margin:0 auto;}
 .hdr{margin-bottom:20px;}
 .hdr-tag{font-size:11px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
@@ -160,10 +160,21 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   <button class="tab" onclick="showPage('hist',this)">📅 Histórico</button>
 </div>
 
+<!-- Modal de confirmação -->
+<div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;align-items:center;justify-content:center;padding:24px;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:320px;width:100%;">
+    <div id="modalMsg" style="font-size:14px;color:var(--text);margin-bottom:20px;line-height:1.5;text-align:center;"></div>
+    <div style="display:flex;gap:10px;">
+      <button id="modalNo" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:13px;font-weight:700;padding:11px;border-radius:10px;cursor:pointer;">Não</button>
+      <button id="modalYes" style="flex:1;background:var(--accent2);border:none;color:#fff;font-size:13px;font-weight:700;padding:11px;border-radius:10px;cursor:pointer;">Sim</button>
+    </div>
+  </div>
+</div>
+
 <!-- DASHBOARD -->
 <div id="page-dash" class="page on">
-  <div style="margin-bottom:16px;">
-    <select id="mesSelect" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:13px;padding:9px 12px;border-radius:10px;-webkit-appearance:none;appearance:none;">
+  <div style="margin-bottom:16px;display:flex;gap:8px;align-items:center;">
+    <select id="mesSelect" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:13px;padding:9px 12px;border-radius:10px;-webkit-appearance:none;appearance:none;">
       <option value="Jan/2025">Janeiro 2025</option>
       <option value="Fev/2025">Fevereiro 2025</option>
       <option value="Mar/2025">Março 2025</option>
@@ -177,7 +188,10 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
       <option value="Nov/2025">Novembro 2025</option>
       <option value="Dez/2025">Dezembro 2025</option>
     </select>
+    <button id="lockBtn" onclick="toggleLock()" title="Bloquear edições" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:18px;width:38px;height:38px;border-radius:10px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;">🔓</button>
+    <button id="resetBtn" onclick="resetMes()" style="background:var(--red-dim);border:1px solid rgba(248,113,113,.3);color:var(--red);font-size:12px;font-weight:700;padding:0 14px;height:38px;border-radius:10px;cursor:pointer;white-space:nowrap;flex-shrink:0;-webkit-tap-highlight-color:transparent;">🗑 Limpar</button>
   </div>
+  <div id="lockedBanner" style="display:none;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--yellow);text-align:center;">🔒 Mês bloqueado — desbloqueie para editar</div>
 
   <div class="sec">
     <div class="sec-hdr" onclick="tog(this)"><span class="sec-title">📥 Receitas</span><span class="sec-total" id="lRec">R$ 0,00</span><span class="sec-icon">▼</span></div>
@@ -377,11 +391,12 @@ window.calc = function(){
 
 // ─── Save / Load ─────────────────────────────────────────────────────────────
 function scheduleSave(){
-  clearTimeout(saveTimer);
-  syncStatus('saving','Salvando...');
-  console.log('scheduleSave called, starting timer...');
-  saveTimer = setTimeout(save, 1000);
-}
+    if (isLocked()) return;
+    clearTimeout(saveTimer);
+    syncStatus('saving','Salvando...');
+    console.log('scheduleSave called, starting timer...');
+    saveTimer = setTimeout(save, 1000);
+  }
 
 async function save(){
   const mes = el('mesSelect').value.replace('/','_');
@@ -393,6 +408,7 @@ async function save(){
   try {
     await setDoc(doc(db,'meses',mes), d);
     syncStatus('ok','Salvo ✓ — sincronizado entre dispositivos');
+    renderHist();
   } catch(e){
     console.error('Firebase save error:', e.code, e.message);
     syncStatus('err','Erro ao salvar — verifique a conexão');
@@ -417,10 +433,89 @@ async function load(){
   } catch(e){
     syncStatus('err','Sem conexão — alguns dados podem não estar atualizados');
   }
-  renderGastos(); calc();
+  renderGastos(); calc(); updateLockUI();
 }
+  // ─── Modal de confirmação ─────────────────────────────────────────────────
+  function confirmar(msg) {
+    return new Promise(resolve => {
+      const modal = el('modal');
+      el('modalMsg').textContent = msg;
+      modal.style.display = 'flex';
+      const yes = el('modalYes'), no = el('modalNo');
+      const cleanup = (val) => { modal.style.display = 'none'; resolve(val); };
+      yes.onclick = () => cleanup(true);
+      no.onclick = () => cleanup(false);
+    });
+  }
 
-// ─── Toggle ──────────────────────────────────────────────────────────────────
+  // ─── Lock ─────────────────────────────────────────────────────────────────
+  let lockedMeses = {};
+
+  function isLocked() {
+    return !!lockedMeses[el('mesSelect').value];
+  }
+
+  function updateLockUI() {
+    const locked = isLocked();
+    el('lockBtn').textContent = locked ? '🔒' : '🔓';
+    el('lockBtn').style.borderColor = locked ? 'rgba(251,191,36,.4)' : 'var(--border)';
+    el('lockBtn').style.background = locked ? 'rgba(251,191,36,.08)' : 'var(--surface2)';
+    el('lockedBanner').style.display = locked ? 'block' : 'none';
+    el('resetBtn').style.opacity = locked ? '0.3' : '1';
+    el('resetBtn').style.pointerEvents = locked ? 'none' : 'auto';
+    // Desabilita inputs se bloqueado
+    document.querySelectorAll('#page-dash input, #page-dash select:not(#mesSelect), #page-dash .add-btn').forEach(inp => {
+      inp.disabled = locked;
+      inp.style.opacity = locked ? '0.4' : '1';
+    });
+  }
+
+  window.toggleLock = async function() {
+    const mes = el('mesSelect').value;
+    const locked = isLocked();
+    const msg = locked
+      ? `Desbloquear edições em ${mes}?`
+      : `Bloquear ${mes} para evitar edições acidentais?`;
+    const ok = await confirmar(msg);
+    if (!ok) return;
+    lockedMeses[mes] = !locked;
+    localStorage.setItem('lockedMeses', JSON.stringify(lockedMeses));
+    updateLockUI();
+  };
+
+  function loadLocks() {
+    try { lockedMeses = JSON.parse(localStorage.getItem('lockedMeses') || '{}'); } catch(e) { lockedMeses = {}; }
+    updateLockUI();
+  }
+
+  window.resetMes = async function(){
+    if (isLocked()) { await confirmar('🔒 Este mês está bloqueado.\n\nDesbloqueie primeiro para limpar os dados.'); return; }
+    const mes = el('mesSelect').value;
+    const mesKey = mes.replace('/','_');
+    const ok = await confirmar(`Tem certeza que deseja limpar os dados variáveis de ${mes}?\n\nGastos fixos, saldos e metas serão mantidos.`);
+    if (!ok) return;
+
+    // Limpa apenas variáveis
+    gastosVar = [];
+    el('aulasQtd').value = 0;
+    el('podcast').value = 0;
+    el('outrasRec').value = 0;
+    renderGastos(); calc();
+
+    // Salva no Firebase mantendo os fixos
+    try {
+      const ids_fixos = ['cartao','internet','adobe','smartfit','hbo','yt','icloud','gone','gdrive','saldoPF','saldoCaixinha','saldoPJ','guardado'];
+      const d = { aulasQtd: 0, podcast: 0, outrasRec: 0, gastosVar: [], pai: el('pai').value };
+      ids_fixos.forEach(id => d[id] = el(id).value);
+      await setDoc(doc(db,'meses',mesKey), d);
+      syncStatus('ok','Mês limpo ✓');
+      renderHist();
+    } catch(e){
+      console.error(e);
+      syncStatus('err','Erro ao limpar — tente novamente');
+    }
+  };
+
 window.tog = function(hdr){
   hdr.nextElementSibling.classList.toggle('hide');
   hdr.parentElement.classList.toggle('collapsed');
@@ -496,8 +591,9 @@ function drawPizza(gastos,guardado){
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
-el('mesSelect').addEventListener('change', load);
-load();
+  el('mesSelect').addEventListener('change', () => { load(); loadLocks(); });
+  loadLocks();
+  load();
 </script>
 </body>
 </html>
