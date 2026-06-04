@@ -174,20 +174,8 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <!-- DASHBOARD -->
 <div id="page-dash" class="page on">
   <div style="margin-bottom:16px;display:flex;gap:8px;align-items:center;">
-    <select id="mesSelect" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:13px;padding:9px 12px;border-radius:10px;-webkit-appearance:none;appearance:none;">
-      <option value="Jan/2025">Janeiro 2025</option>
-      <option value="Fev/2025">Fevereiro 2025</option>
-      <option value="Mar/2025">Março 2025</option>
-      <option value="Abr/2025">Abril 2025</option>
-      <option value="Mai/2025" selected>Maio 2025</option>
-      <option value="Jun/2025">Junho 2025</option>
-      <option value="Jul/2025">Julho 2025</option>
-      <option value="Ago/2025">Agosto 2025</option>
-      <option value="Set/2025">Setembro 2025</option>
-      <option value="Out/2025">Outubro 2025</option>
-      <option value="Nov/2025">Novembro 2025</option>
-      <option value="Dez/2025">Dezembro 2025</option>
-    </select>
+    <select id="anoSelect" style="width:90px;flex-shrink:0;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:13px;padding:9px 10px;border-radius:10px;-webkit-appearance:none;appearance:none;" onchange="onAnoChange()"></select>
+    <select id="mesSelect" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:13px;padding:9px 12px;border-radius:10px;-webkit-appearance:none;appearance:none;"></select>
     <button id="lockBtn" onclick="toggleLock()" title="Bloquear edições" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:18px;width:38px;height:38px;border-radius:10px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;">🔓</button>
     <button id="resetBtn" onclick="resetMes()" style="background:var(--red-dim);border:1px solid rgba(248,113,113,.3);color:var(--red);font-size:12px;font-weight:700;padding:0 14px;height:38px;border-radius:10px;cursor:pointer;white-space:nowrap;flex-shrink:0;-webkit-tap-highlight-color:transparent;">🗑 Limpar</button>
   </div>
@@ -280,6 +268,10 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 
 <!-- HISTÓRICO -->
 <div id="page-hist" class="page">
+  <div style="margin-bottom:12px;display:flex;gap:8px;align-items:center;">
+    <select id="histAnoSelect" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:13px;padding:9px 12px;border-radius:10px;-webkit-appearance:none;appearance:none;" onchange="renderHist()"></select>
+    <button onclick="addAno()" style="background:var(--accent2);border:none;color:#fff;font-size:12px;font-weight:700;padding:0 14px;height:38px;border-radius:10px;cursor:pointer;white-space:nowrap;flex-shrink:0;-webkit-tap-highlight-color:transparent;">+ Ano</button>
+  </div>
   <div class="hstats">
     <div class="hstat"><div class="hstat-lbl">Recebido</div><div class="hstat-val" style="color:var(--green)" id="hRec">—</div></div>
     <div class="hstat"><div class="hstat-lbl">Gasto</div><div class="hstat-val" style="color:var(--red)" id="hGasto">—</div></div>
@@ -293,7 +285,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
     </div>
   </div>
   <div class="htable">
-    <div class="hth-row"><div class="hth">Mês</div><div class="hth">Receitas</div><div class="hth">Gastos</div><div class="hth">Sobra</div><div class="hth">Aulas</div></div>
+    <div class="hth-row" style="grid-template-columns:52px 1fr 1fr 1fr 42px 32px;"><div class="hth">Mês</div><div class="hth">Receitas</div><div class="hth">Gastos</div><div class="hth">Sobra</div><div class="hth">Aulas</div><div class="hth"></div></div>
     <div id="htbody"></div>
     <div class="htot" id="htot" style="display:none">
       <div class="htot-td">Total</div>
@@ -301,6 +293,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
       <div class="htot-td r" id="htGasto">—</div>
       <div class="htot-td a" id="htSobra">—</div>
       <div class="htot-td" id="htAulas">—</div>
+      <div class="htot-td"></div>
     </div>
   </div>
 </div>
@@ -399,14 +392,15 @@ function scheduleSave(){
   }
 
 async function save(){
-  const mes = el('mesSelect').value.replace('/','_');
+  const ano = el('anoSelect').value;
+  const mes = el('mesSelect').value;
+  const mesKey = getMesKey(ano, MCURTO.indexOf(mes));
   const ids = ['aulasQtd','podcast','pai','outrasRec','cartao','internet','adobe','smartfit','hbo','yt','icloud','gone','gdrive','saldoPF','saldoCaixinha','saldoPJ','guardado'];
   const d = {};
   ids.forEach(id => d[id]=el(id).value);
   d.gastosVar = gastosVar;
-  d.mesLabel = el('mesSelect').value;
   try {
-    await setDoc(doc(db,'meses',mes), d);
+    await setDoc(doc(db,'meses',mesKey), d);
     syncStatus('ok','Salvo ✓ — sincronizado entre dispositivos');
     renderHist();
   } catch(e){
@@ -416,8 +410,9 @@ async function save(){
 }
 
 async function load(){
+  const ano = el('anoSelect').value;
   const mes = el('mesSelect').value;
-  const mesKey = mes.replace('/','_');
+  const mesKey = getMesKey(ano, MCURTO.indexOf(mes));
   gastosVar = [];
   syncStatus('saving','Carregando...');
   try {
@@ -435,6 +430,7 @@ async function load(){
   }
   renderGastos(); calc(); updateLockUI();
 }
+
   // ─── Modal de confirmação ─────────────────────────────────────────────────
   function confirmar(msg) {
     return new Promise(resolve => {
@@ -452,7 +448,9 @@ async function load(){
   let lockedMeses = {};
 
   function isLocked() {
-    return !!lockedMeses[el('mesSelect').value];
+    const ano = el('anoSelect').value;
+    const mes = el('mesSelect').value;
+    return !!lockedMeses[`${mes}_${ano}`];
   }
 
   function updateLockUI() {
@@ -463,22 +461,21 @@ async function load(){
     el('lockedBanner').style.display = locked ? 'block' : 'none';
     el('resetBtn').style.opacity = locked ? '0.3' : '1';
     el('resetBtn').style.pointerEvents = locked ? 'none' : 'auto';
-    // Desabilita inputs se bloqueado
-    document.querySelectorAll('#page-dash input, #page-dash select:not(#mesSelect), #page-dash .add-btn').forEach(inp => {
+    document.querySelectorAll('#page-dash input, #page-dash select:not(#mesSelect):not(#anoSelect), #page-dash .add-btn').forEach(inp => {
       inp.disabled = locked;
       inp.style.opacity = locked ? '0.4' : '1';
     });
   }
 
   window.toggleLock = async function() {
+    const ano = el('anoSelect').value;
     const mes = el('mesSelect').value;
+    const key = `${mes}_${ano}`;
     const locked = isLocked();
-    const msg = locked
-      ? `Desbloquear edições em ${mes}?`
-      : `Bloquear ${mes} para evitar edições acidentais?`;
+    const msg = locked ? `Desbloquear edições em ${mes}/${ano}?` : `Bloquear ${mes}/${ano} para evitar edições acidentais?`;
     const ok = await confirmar(msg);
     if (!ok) return;
-    lockedMeses[mes] = !locked;
+    lockedMeses[key] = !locked;
     localStorage.setItem('lockedMeses', JSON.stringify(lockedMeses));
     updateLockUI();
   };
@@ -490,19 +487,18 @@ async function load(){
 
   window.resetMes = async function(){
     if (isLocked()) { await confirmar('🔒 Este mês está bloqueado.\n\nDesbloqueie primeiro para limpar os dados.'); return; }
+    const ano = el('anoSelect').value;
     const mes = el('mesSelect').value;
-    const mesKey = mes.replace('/','_');
-    const ok = await confirmar(`Tem certeza que deseja limpar os dados variáveis de ${mes}?\n\nGastos fixos, saldos e metas serão mantidos.`);
+    const mesKey = getMesKey(ano, MCURTO.indexOf(mes));
+    const ok = await confirmar(`Tem certeza que deseja limpar os dados variáveis de ${mes}/${ano}?\n\nGastos fixos, saldos e metas serão mantidos.`);
     if (!ok) return;
 
-    // Limpa apenas variáveis
     gastosVar = [];
     el('aulasQtd').value = 0;
     el('podcast').value = 0;
     el('outrasRec').value = 0;
     renderGastos(); calc();
 
-    // Salva no Firebase mantendo os fixos
     try {
       const ids_fixos = ['cartao','internet','adobe','smartfit','hbo','yt','icloud','gone','gdrive','saldoPF','saldoCaixinha','saldoPJ','guardado'];
       const d = { aulasQtd: 0, podcast: 0, outrasRec: 0, gastosVar: [], pai: el('pai').value };
@@ -529,14 +525,81 @@ window.showPage = function(id, btn){
   if(id==='hist') renderHist();
 };
 
-// ─── Histórico ───────────────────────────────────────────────────────────────
-const MESES=['Jan/2025','Fev/2025','Mar/2025','Abr/2025','Mai/2025','Jun/2025','Jul/2025','Ago/2025','Set/2025','Out/2025','Nov/2025','Dez/2025'];
-const MLBL=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+// ─── Anos & Meses ────────────────────────────────────────────────────────────
+const MNOMES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const MCURTO=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
+function getAnos(){
+  try { return JSON.parse(localStorage.getItem('anos')||'[]'); } catch(e){ return []; }
+}
+function saveAnos(anos){ localStorage.setItem('anos',JSON.stringify(anos)); }
+
+function initAnos(){
+  let anos = getAnos();
+  const anoAtual = new Date().getFullYear().toString();
+  if(!anos.includes(anoAtual)){ anos.push(anoAtual); saveAnos(anos); }
+  return anos;
+}
+
+function renderAnoSelects(){
+  const anos = getAnos();
+  [el('anoSelect'), el('histAnoSelect')].forEach(sel => {
+    if(!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = anos.map(a=>`<option value="${a}">${a}</option>`).join('');
+    if(anos.includes(cur)) sel.value = cur;
+    else sel.value = anos[anos.length-1];
+  });
+}
+
+function getMesKey(ano, mes){
+  return `${MCURTO[mes]}_${ano}`;
+}
+
+function getMeses(ano){
+  return MCURTO.map((m,i) => `${m}/${ano}`);
+}
+
+function getMesValue(){
+  const ano = el('anoSelect').value;
+  const mes = el('mesSelect').value;
+  return `${mes}/${ano}`;
+}
+
+function buildMesSelect(ano){
+  const sel = el('mesSelect');
+  const curMes = sel.value || MCURTO[new Date().getMonth()];
+  sel.innerHTML = MCURTO.map((m,i)=>`<option value="${m}">${MNOMES[i]} ${ano}</option>`).join('');
+  if([...sel.options].some(o=>o.value===curMes)) sel.value=curMes;
+  else sel.value=MCURTO[0];
+}
+
+window.onAnoChange = function(){
+  const ano = el('anoSelect').value;
+  buildMesSelect(ano);
+  load(); loadLocks();
+};
+
+window.addAno = async function(){
+  const anos = getAnos();
+  const ultimo = parseInt(anos[anos.length-1]);
+  const novoAno = (ultimo+1).toString();
+  const ok = await confirmar(`Adicionar o ano ${novoAno}?\n\nEle aparecerá vazio, pronto para preencher.`);
+  if(!ok) return;
+  anos.push(novoAno);
+  saveAnos(anos);
+  renderAnoSelects();
+  el('histAnoSelect').value = novoAno;
+  renderHist();
+};
+
+// ─── Histórico ───────────────────────────────────────────────────────────────
 async function renderHist(){
   el('htbody').innerHTML='<div class="hempty">Carregando...</div>';
+  const ano = el('histAnoSelect').value;
   try {
-    const snaps = await Promise.all(MESES.map(m=>getDoc(doc(db,'meses',m.replace('/','_')))));
+    const keys = MCURTO.map(m=>getMesKey(ano,MCURTO.indexOf(m)));
+    const snaps = await Promise.all(keys.map(k=>getDoc(doc(db,'meses',k))));
     const rows = snaps.map((snap,i)=>{
       if(!snap.exists()) return null;
       const d=snap.data();
@@ -547,13 +610,18 @@ async function renderHist(){
       const fixos=g('cartao')+g('internet')+g('adobe')+g('smartfit')+g('hbo')+g('yt')+g('icloud')+g('gone')+g('gdrive');
       const gastos=fixos+gv, sobra=rec-gastos;
       if(rec===0&&gastos===0) return null;
-      return {mes:MLBL[i],aulas,rec,gastos,sobra,guardado:g('guardado')};
+      return {mes:MCURTO[i],key:keys[i],aulas,rec,gastos,sobra,guardado:g('guardado')};
     });
     const com=rows.filter(Boolean);
     const sRec=com.reduce((s,r)=>s+r.rec,0);
     const sGasto=com.reduce((s,r)=>s+r.gastos,0);
-    const curIdx=MESES.indexOf(el('mesSelect').value);
-    const guardado=rows[curIdx]?rows[curIdx].guardado:0;
+    const curMes = el('mesSelect')?.value||'';
+    const curAno = el('anoSelect')?.value||'';
+    let guardado=0;
+    if(curAno===ano){
+      const idx=MCURTO.indexOf(curMes);
+      if(idx>=0 && rows[idx]) guardado=rows[idx].guardado;
+    }
     el('hRec').textContent=brlk(sRec);
     el('hGasto').textContent=brlk(sGasto);
     el('hGuardado').textContent=brlk(guardado);
@@ -563,8 +631,15 @@ async function renderHist(){
       el('htot').style.display='none'; return;
     }
     el('htbody').innerHTML=rows.map((r,i)=>{
-      if(!r) return `<div class="htr"><div class="htd dim">${MLBL[i]}</div><div class="htd dim">—</div><div class="htd dim">—</div><div class="htd dim">—</div><div class="htd dim">—</div></div>`;
-      return `<div class="htr"><div class="htd">${r.mes}</div><div class="htd g">${brlk(r.rec)}</div><div class="htd r">${brlk(r.gastos)}</div><div class="htd ${r.sobra>=0?'a':'r'}">${brlk(r.sobra)}</div><div class="htd">${r.aulas}</div></div>`;
+      if(!r) return `<div class="htr" style="grid-template-columns:52px 1fr 1fr 1fr 42px 32px;"><div class="htd dim">${MCURTO[i]}</div><div class="htd dim">—</div><div class="htd dim">—</div><div class="htd dim">—</div><div class="htd dim">—</div><div class="htd"></div></div>`;
+      return `<div class="htr" style="grid-template-columns:52px 1fr 1fr 1fr 42px 32px;">
+        <div class="htd">${r.mes}</div>
+        <div class="htd g">${brlk(r.rec)}</div>
+        <div class="htd r">${brlk(r.gastos)}</div>
+        <div class="htd ${r.sobra>=0?'a':'r'}">${brlk(r.sobra)}</div>
+        <div class="htd">${r.aulas}</div>
+        <div class="htd"><button onclick="deleteMesHist('${r.key}','${r.mes}/${ano}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 4px;-webkit-tap-highlight-color:transparent;" title="Remover mês">🗑</button></div>
+      </div>`;
     }).join('');
     const sSobra=com.reduce((s,r)=>s+r.sobra,0);
     const sAulas=com.reduce((s,r)=>s+r.aulas,0);
@@ -572,9 +647,23 @@ async function renderHist(){
     el('htSobra').textContent=brlk(sSobra); el('htAulas').textContent=sAulas;
     el('htot').style.display='grid';
   } catch(e){
+    console.error(e);
     el('htbody').innerHTML='<div class="hempty">Erro ao carregar. Verifique a conexão.</div>';
   }
 }
+
+window.deleteMesHist = async function(key, label){
+  const ok = await confirmar(`Remover ${label} do histórico?\n\nTodos os dados desse mês serão apagados permanentemente.`);
+  if(!ok) return;
+  try {
+    const {deleteDoc} = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    await deleteDoc(doc(db,'meses',key));
+    syncStatus('ok','Mês removido ✓');
+    renderHist();
+  } catch(e){
+    syncStatus('err','Erro ao remover');
+  }
+};
 
 function drawPizza(gastos,guardado){
   const total=gastos+guardado;
@@ -592,6 +681,19 @@ function drawPizza(gastos,guardado){
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
   el('mesSelect').addEventListener('change', () => { load(); loadLocks(); });
+  el('anoSelect').addEventListener('change', () => { onAnoChange(); });
+
+  // Init anos
+  initAnos();
+  renderAnoSelects();
+  const anoAtual = new Date().getFullYear().toString();
+  el('anoSelect').value = anoAtual;
+  el('histAnoSelect').value = anoAtual;
+  buildMesSelect(anoAtual);
+  // Seleciona mês atual
+  const mesAtual = MCURTO[new Date().getMonth()];
+  el('mesSelect').value = mesAtual;
+
   loadLocks();
   load();
 </script>
